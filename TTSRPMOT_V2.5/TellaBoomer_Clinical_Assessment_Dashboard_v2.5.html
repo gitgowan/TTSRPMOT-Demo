@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TellaBoomer Clinical Assessment Dashboard - Professional ADL Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            padding-top: 80px;
+        }
+        
+        /* NAVIGATION HEADER */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+        
+        .nav-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .nav-select-wrapper {
+            position: relative;
+        }
+        
+        .nav-select {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-select:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(30, 41, 59, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            min-width: 280px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 1002;
+        }
+        
+        .nav-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .nav-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .nav-dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+        }
+        
+        .nav-dropdown-item.active {
+            background: rgba(102, 126, 234, 0.3);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 24px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 4px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .patient-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .last-update {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        /* NAVIGATION TABS */
+        .nav-tabs {
+            background: white;
+            border-bottom: 2px solid var(--gray-200);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-tabs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 8px;
+            padding: 0 40px;
+        }
+        
+        .nav-tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tab:hover {
+            background: var(--gray-50);
+            color: var(--gray-900);
+        }
+        
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .nav-tab-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* CONTENT */
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 40px 40px 40px;
+        }
+        
+        /* NAVIGATION HEADER */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(59, 130, 246, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .nav-back { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .nav-back:hover { background: rgba(255,255,255,0.3); transform: translateX(-4px); }
+        .nav-title { color: white; font-size: 1.25rem; font-weight: 600; flex: 1; text-align: center; }
+        .nav-select-wrapper { position: relative; }
+        .nav-select { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .nav-select:hover { background: rgba(255,255,255,0.3); }
+        .nav-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: rgba(30,41,59,0.98); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; min-width: 280px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s; z-index: 1002; }
+        .nav-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: all; }
+        .nav-dropdown-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-dropdown-item:last-child { border-bottom: none; }
+        .nav-dropdown-item:hover { background: rgba(59,130,246,0.2); color: white; }
+        .nav-dropdown-item.active { background: rgba(59,130,246,0.3); color: white; font-weight: 600; }
+        .nav-icon { font-size: 1.5rem;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* PAGE TITLE */
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+        }
+        
+        .page-subtitle {
+            color: var(--gray-500);
+            margin-bottom: 32px;
+        }
+        
+        /* ADL MATRIX */
+        .adl-matrix {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .adl-matrix h3 {
+            font-size: 1.3rem;
+            margin-bottom: 24px;
+            color: var(--gray-800);
+        }
+        
+        .adl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        
+        .adl-item {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            background: var(--gray-50);
+        }
+        
+        .adl-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .adl-item.tracked {
+            border-color: var(--success);
+            background: #ecfdf5;
+        }
+        
+        .adl-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        
+        .adl-label {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+        
+        .adl-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 8px 0;
+        }
+        
+        .adl-status.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .adl-sensor {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 8px;
+        }
+        
+        /* CLINICAL METRICS GRID */
+        .clinical-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+        
+        .metric-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .metric-card.risk-card {
+            border-left-color: var(--warning);
+        }
+        
+        .metric-card.critical-card {
+            border-left-color: var(--danger);
+        }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .metric-header h4 {
+            font-size: 1.1rem;
+            color: var(--gray-800);
+        }
+        
+        .metric-timeframe {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            background: var(--gray-100);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        
+        .metric-primary {
+            margin-bottom: 16px;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+        }
+        
+        .metric-unit {
+            font-size: 1.2rem;
+            color: var(--gray-500);
+            margin-left: 4px;
+        }
+        
+        .metric-details {
+            border-top: 1px solid var(--gray-100);
+            padding-top: 16px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .detail-row span:first-child {
+            color: var(--gray-600);
+        }
+        
+        .detail-row span:last-child {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        /* FIM SCORING */
+        .fim-score-container {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .fim-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .fim-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        /* RISK BADGES */
+        .risk-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .risk-badge.low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .risk-badge.medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .risk-badge.high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* PRESENCE INDICATOR */
+        .presence-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+        
+        .presence-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--gray-400);
+            transition: all 0.3s;
+        }
+        
+        .presence-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        /* HYGIENE TIMELINE */
+        .hygiene-timeline {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .timeline-header {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--gray-700);
+        }
+        
+        .day-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+        
+        .day-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            border: 2px solid var(--gray-200);
+        }
+        
+        .day-cell:hover {
+            transform: scale(1.05);
+        }
+        
+        .day-cell.shower-yes {
+            background: #d1fae5;
+            border-color: var(--success);
+        }
+        
+        .day-cell.shower-no {
+            background: #fee2e2;
+            border-color: var(--danger);
+        }
+        
+        .day-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .day-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* HYGIENE STATS */
+        .hygiene-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .hygiene-stat {
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+        
+        .hygiene-stat span:last-child {
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 1.1rem;
+        }
+        
+        /* STATUS INDICATORS */
+        .status-active {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .status-good {
+            color: var(--success);
+        }
+        
+        .status-cold {
+            color: var(--info);
+        }
+        
+        .status-warm {
+            color: var(--warning);
+        }
+        
+        /* TEMPERATURE RANGE VISUAL */
+        .temp-comfort-range {
+            margin: 20px 0;
+        }
+        
+        .range-visual {
+            position: relative;
+            height: 12px;
+            background: linear-gradient(90deg, #3b82f6, #10b981, #f59e0b, #ef4444);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .comfort-zone {
+            position: absolute;
+            left: 32%;
+            right: 32%;
+            height: 100%;
+            background: rgba(16, 185, 129, 0.3);
+            border-left: 2px solid var(--success);
+            border-right: 2px solid var(--success);
+        }
+        
+        .temp-marker {
+            position: absolute;
+            top: -4px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid var(--gray-800);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .comfort-label {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        /* STILLNESS ALERT */
+        .stillness-alert {
+            background: #fef3c7;
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+        
+        .stillness-alert.active {
+            display: flex;
+        }
+        
+        .alert-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .nav-tabs-container {
+                padding: 0 20px;
+                overflow-x: auto;
+            }
+            
+            .nav-tab {
+                flex-shrink: 0;
+            }
+            
+            .clinical-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .adl-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .day-grid {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION HEADER -->
+    <div class="nav-header">
+        <button class="nav-back" onclick="window.location.href='TellaBoomer_Gallery_v2.5.html'">
+            ← Back to Gallery
+        </button>
+        <div class="nav-title">Clinical Assessment Dashboard</div>
+        <div class="nav-select-wrapper">
+            <button class="nav-select" onclick="toggleDashboardMenu()">
+                Switch Dashboard ▼
+            </button>
+            <div class="nav-dropdown" id="dashboardMenu">
+                <a href="TellaBoomer_Family_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
+                    <span>Family Caregiver</span>
+                </a>
+                <a href="TellaBoomer_Clinical_Assessment_Dashboard_v2.5.html" class="nav-dropdown-item active">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Clinical Assessment</span>
+                </a>
+                <a href="TellaBoomer_Movement_Patterns_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Movement Patterns</span>
+                </a>
+                <a href="TellaBoomer_OT_Narrative_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">📖</span>
+                    <span>OT Narrative</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>🏥 Clinical Assessment Dashboard</h1>
+                <p>Professional ADL Monitoring & Documentation</p>
+            </div>
+            <div class="header-right">
+                <div class="patient-name">Patient: Demo Client</div>
+                <div class="last-update">Last updated: <span id="lastUpdate">--:--</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="nav-tabs">
+        <div class="nav-tabs-container">
+            <div class="nav-tab active" onclick="showTab('adl')">
+                <span class="nav-tab-icon">📋</span>
+                <span>ADL Monitoring</span>
+            </div>
+            <div class="nav-tab" onclick="showTab('overview')">
+                <span class="nav-tab-icon">📊</span>
+                <span>Overview</span>
+            </div>
+            <div class="nav-tab" onclick="showTab('trends')">
+                <span class="nav-tab-icon">📈</span>
+                <span>Trends</span>
+            </div>
+            <div class="nav-tab" onclick="showTab('reports')">
+                <span class="nav-tab-icon">📄</span>
+                <span>Reports</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+        <!-- ADL MONITORING TAB -->
+        <div class="tab-panel active" id="adl">
+            <h2 class="page-title">ADL Monitoring - 6 Core Activities</h2>
+            <p class="page-subtitle">Comprehensive tracking of Activities of Daily Living with multi-sensor integration</p>
+
+            <!-- ADL COVERAGE MATRIX -->
+            <div class="adl-matrix">
+                <h3>ADL Coverage Status</h3>
+                <div class="adl-grid">
+                    <div class="adl-item tracked">
+                        <div class="adl-icon">🏃</div>
+                        <div class="adl-label">Mobility</div>
+                        <div class="adl-status active">✓ Tracked</div>
+                        <div class="adl-sensor">Motion sensors</div>
+                    </div>
+                    <div class="adl-item tracked">
+                        <div class="adl-icon">🚽</div>
+                        <div class="adl-label">Toileting</div>
+                        <div class="adl-status active">✓ Tracked</div>
+                        <div class="adl-sensor">Float + Motion</div>
+                    </div>
+                    <div class="adl-item tracked">
+                        <div class="adl-icon">🚿</div>
+                        <div class="adl-label">Bathing</div>
+                        <div class="adl-status active">✓ Tracked</div>
+                        <div class="adl-sensor">Humidity + Motion</div>
+                    </div>
+                    <div class="adl-item tracked">
+                        <div class="adl-icon">🛏️</div>
+                        <div class="adl-label">Rest/Sleep</div>
+                        <div class="adl-status active">✓ Tracked</div>
+                        <div class="adl-sensor">mmWave + Motion</div>
+                    </div>
+                    <div class="adl-item tracked">
+                        <div class="adl-icon">🚨</div>
+                        <div class="adl-label">Safety</div>
+                        <div class="adl-status active">✓ Tracked</div>
+                        <div class="adl-sensor">mmWave distance</div>
+                    </div>
+                    <div class="adl-item tracked">
+                        <div class="adl-icon">🌡️</div>
+                        <div class="adl-label">Environment</div>
+                        <div class="adl-status active">✓ Tracked</div>
+                        <div class="adl-sensor">Temperature</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLINICAL METRICS GRID -->
+            <div class="clinical-grid">
+                <!-- TOILETING FUNCTION -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Toileting Function</h4>
+                        <span class="metric-timeframe">24 hours</span>
+                    </div>
+                    <div class="metric-primary">
+                        <span id="toiletingFrequency" class="metric-value">6</span>
+                        <span class="metric-unit">visits</span>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-row">
+                            <span>Flush Count:</span>
+                            <span id="flushCount">5</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Last Visit:</span>
+                            <span id="lastFlush">2:45 PM</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Pattern:</span>
+                            <span id="toiletingPattern">Normal</span>
+                        </div>
+                    </div>
+                    <div class="fim-score-container">
+                        <span class="fim-label">FIM Score:</span>
+                        <span id="toiletingFIM" class="fim-score">7/7</span>
+                    </div>
+                </div>
+
+                <!-- BATHING INDEPENDENCE -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Bathing Independence</h4>
+                        <span class="metric-timeframe">7 days</span>
+                    </div>
+                    <div class="metric-primary">
+                        <span id="bathingAdherence" class="metric-value">86</span>
+                        <span class="metric-unit">%</span>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-row">
+                            <span>Shower Days:</span>
+                            <span id="showerDays">6/7</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Avg Duration:</span>
+                            <span id="avgShowerDuration">12 min</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Last Shower:</span>
+                            <span id="lastShower">8:30 AM</span>
+                        </div>
+                    </div>
+                    <div class="fim-score-container">
+                        <span class="fim-label">FIM Score:</span>
+                        <span id="bathingFIM" class="fim-score">6/7</span>
+                    </div>
+                </div>
+
+                <!-- SLEEP QUALITY -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Sleep Quality</h4>
+                        <span class="metric-timeframe">Last night</span>
+                    </div>
+                    <div class="metric-primary">
+                        <span id="sleepQualityScore" class="metric-value">82</span>
+                        <span class="metric-unit">/100</span>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-row">
+                            <span>Time in Bed:</span>
+                            <span id="timeInBed">8.0 hrs</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Restlessness:</span>
+                            <span id="restlessnessPercent">12%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Bedroom Visits:</span>
+                            <span id="bedroomVisits">3</span>
+                        </div>
+                    </div>
+                    <div class="fim-score-container">
+                        <span class="fim-label">Sleep Rating:</span>
+                        <span id="sleepRating" class="fim-score">Good</span>
+                    </div>
+                </div>
+
+                <!-- FALL RISK ASSESSMENT -->
+                <div class="metric-card risk-card">
+                    <div class="metric-header">
+                        <h4>Fall Risk Assessment</h4>
+                        <span class="metric-timeframe">Real-time</span>
+                    </div>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <span id="fallRiskBadge" class="risk-badge low">LOW RISK</span>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-row">
+                            <span>Falls Today:</span>
+                            <span id="fallCountToday">0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Last Incident:</span>
+                            <span id="lastFallTime">None</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Monitoring:</span>
+                            <span class="status-active">✓ Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENVIRONMENTAL SAFETY -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Environmental Safety</h4>
+                        <span class="metric-timeframe">Current</span>
+                    </div>
+                    <div class="metric-primary">
+                        <span id="environmentalTemp" class="metric-value">72</span>
+                        <span class="metric-unit">°F</span>
+                    </div>
+                    <div class="temp-comfort-range">
+                        <div class="range-visual">
+                            <div class="comfort-zone"></div>
+                            <div class="temp-marker" id="tempMarker" style="left: 50%;"></div>
+                        </div>
+                        <div class="range-labels">
+                            <span>60°</span>
+                            <span class="comfort-label">Comfort Zone (68-76°)</span>
+                            <span>85°</span>
+                        </div>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-row">
+                            <span>Status:</span>
+                            <span id="tempStatus" class="status-good">Comfortable</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRESENCE MONITORING -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Presence Monitoring</h4>
+                        <span class="metric-timeframe">mmWave sensors</span>
+                    </div>
+                    <div class="presence-indicator">
+                        <div class="presence-dot active" id="presenceDot"></div>
+                        <span id="presenceText" style="font-weight: 600;">Present</span>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-row">
+                            <span>Location:</span>
+                            <span id="presenceLocation">Living Room</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Duration:</span>
+                            <span id="presenceDuration">45 min</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Daily Events:</span>
+                            <span id="presenceEvents">8</span>
+                        </div>
+                    </div>
+                    <div class="stillness-alert" id="stillnessAlert">
+                        <span class="alert-icon">⚠️</span>
+                        <span>Extended stillness detected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HYGIENE ADHERENCE ANALYSIS -->
+            <div class="hygiene-timeline">
+                <div class="timeline-header">Last 7 Days Shower Pattern</div>
+                <div class="day-grid" id="showerDayGrid">
+                    <div class="day-cell shower-yes">
+                        <div class="day-name">Sun</div>
+                        <div class="day-icon">✓</div>
+                    </div>
+                    <div class="day-cell shower-yes">
+                        <div class="day-name">Mon</div>
+                        <div class="day-icon">✓</div>
+                    </div>
+                    <div class="day-cell shower-no">
+                        <div class="day-name">Tue</div>
+                        <div class="day-icon">✗</div>
+                    </div>
+                    <div class="day-cell shower-yes">
+                        <div class="day-name">Wed</div>
+                        <div class="day-icon">✓</div>
+                    </div>
+                    <div class="day-cell shower-yes">
+                        <div class="day-name">Thu</div>
+                        <div class="day-icon">✓</div>
+                    </div>
+                    <div class="day-cell shower-yes">
+                        <div class="day-name">Fri</div>
+                        <div class="day-icon">✓</div>
+                    </div>
+                    <div class="day-cell shower-yes">
+                        <div class="day-name">Sat</div>
+                        <div class="day-icon">✓</div>
+                    </div>
+                </div>
+                <div class="hygiene-stats">
+                    <div class="hygiene-stat">
+                        <span class="stat-label">Morning Showers:</span>
+                        <span id="morningShowers">5</span>
+                    </div>
+                    <div class="hygiene-stat">
+                        <span class="stat-label">Evening Showers:</span>
+                        <span id="eveningShowers">1</span>
+                    </div>
+                    <div class="hygiene-stat">
+                        <span class="stat-label">Avg Duration:</span>
+                        <span id="avgDuration">12 min</span>
+                    </div>
+                    <div class="hygiene-stat">
+                        <span class="stat-label">Adherence Trend:</span>
+                        <span id="adherenceTrend">→ Stable</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div class="tab-panel" id="overview">
+            <h2 class="page-title">Clinical Overview</h2>
+            <p class="page-subtitle">Comprehensive wellness metrics and risk assessment</p>
+            <div style="padding: 40px; text-align: center; color: var(--gray-500);">
+                <p>Overview tab content - Summary metrics, wellness score, activity charts</p>
+            </div>
+        </div>
+
+        <!-- TRENDS TAB -->
+        <div class="tab-panel" id="trends">
+            <h2 class="page-title">Trend Analysis</h2>
+            <p class="page-subtitle">Historical patterns and comparative metrics</p>
+            <div style="padding: 40px; text-align: center; color: var(--gray-500);">
+                <p>Trends tab content - 7-day, 30-day, 90-day comparison charts</p>
+            </div>
+        </div>
+
+        <!-- REPORTS TAB -->
+        <div class="tab-panel" id="reports">
+            <h2 class="page-title">Clinical Reports</h2>
+            <p class="page-subtitle">Documentation and export tools</p>
+            <div style="padding: 40px; text-align: center; color: var(--gray-500);">
+                <p>Reports tab content - SOAP notes, progress reports, billing documentation</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected panel
+            document.getElementById(tabName).classList.add('active');
+            
+            // Mark tab as active
+            event.target.closest('.nav-tab').classList.add('active');
+        }
+
+        // Update dashboard with demo data
+        function updateDashboard() {
+            // Demo data
+            const hubData = {
+                // Toileting
+                wellness_bathroom_visits: 6,
+                wellness_toilet_flushes: 5,
+                wellness_last_flush_time: '2:45 PM',
+                
+                // Bathing
+                wellness_shower_adherence_percent: 86,
+                wellness_shower_days_7day: 6,
+                wellness_last_shower_duration: 12,
+                wellness_last_shower_time: '8:30 AM',
+                wellness_morning_showers: 5,
+                wellness_evening_showers: 1,
+                
+                // Sleep
+                wellness_sleep_quality_score: 82,
+                wellness_total_bed_time: 480,
+                wellness_sleep_restlessness: 12,
+                wellness_bedroom_visits: 3,
+                
+                // Fall risk
+                wellness_fall_count_today: 0,
+                wellness_fall_time: '',
+                
+                // Temperature
+                wellness_avg_temperature: 72,
+                
+                // Presence
+                wellness_presence_active: true,
+                wellness_current_presence_room: 'Living Room',
+                wellness_last_presence_duration: 45,
+                wellness_daily_presence_events: 8
+            };
+            
+            updateADLMetrics(hubData);
+            
+            // Update timestamp
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+        
+        function updateADLMetrics(data) {
+            // Toileting
+            document.getElementById('toiletingFrequency').textContent = data.wellness_bathroom_visits;
+            document.getElementById('flushCount').textContent = data.wellness_toilet_flushes;
+            document.getElementById('lastFlush').textContent = data.wellness_last_flush_time;
+            
+            let toiletingFIM = 7;
+            if (data.wellness_toilet_flushes < 2) toiletingFIM = 6;
+            document.getElementById('toiletingFIM').textContent = `${toiletingFIM}/7`;
+            
+            // Bathing
+            document.getElementById('bathingAdherence').textContent = data.wellness_shower_adherence_percent;
+            document.getElementById('showerDays').textContent = `${data.wellness_shower_days_7day}/7`;
+            document.getElementById('avgShowerDuration').textContent = `${data.wellness_last_shower_duration} min`;
+            document.getElementById('lastShower').textContent = data.wellness_last_shower_time;
+            
+            let bathingFIM = 7;
+            if (data.wellness_shower_adherence_percent < 85) bathingFIM = 6;
+            document.getElementById('bathingFIM').textContent = `${bathingFIM}/7`;
+            
+            // Sleep
+            document.getElementById('sleepQualityScore').textContent = data.wellness_sleep_quality_score;
+            const hours = Math.floor(data.wellness_total_bed_time / 60);
+            const mins = data.wellness_total_bed_time % 60;
+            document.getElementById('timeInBed').textContent = `${hours}.${Math.round(mins/6)} hrs`;
+            document.getElementById('restlessnessPercent').textContent = `${data.wellness_sleep_restlessness}%`;
+            document.getElementById('bedroomVisits').textContent = data.wellness_bedroom_visits;
+            
+            let sleepRating = 'Excellent';
+            if (data.wellness_sleep_quality_score < 80) sleepRating = 'Good';
+            if (data.wellness_sleep_quality_score < 60) sleepRating = 'Fair';
+            document.getElementById('sleepRating').textContent = sleepRating;
+            
+            // Fall risk
+            const fallCount = data.wellness_fall_count_today;
+            const riskBadge = document.getElementById('fallRiskBadge');
+            
+            if (fallCount > 0) {
+                riskBadge.textContent = 'HIGH RISK';
+                riskBadge.className = 'risk-badge high';
+            } else {
+                riskBadge.textContent = 'LOW RISK';
+                riskBadge.className = 'risk-badge low';
+            }
+            
+            document.getElementById('fallCountToday').textContent = fallCount;
+            document.getElementById('lastFallTime').textContent = fallCount > 0 ? data.wellness_fall_time : 'None';
+            
+            // Temperature
+            const temp = data.wellness_avg_temperature;
+            document.getElementById('environmentalTemp').textContent = Math.round(temp);
+            
+            const tempPosition = ((temp - 60) / 25) * 100;
+            document.getElementById('tempMarker').style.left = `${Math.max(0, Math.min(100, tempPosition))}%`;
+            
+            const tempStatusEl = document.getElementById('tempStatus');
+            if (temp < 68) {
+                tempStatusEl.textContent = 'Too Cold';
+                tempStatusEl.className = 'status-cold';
+            } else if (temp > 76) {
+                tempStatusEl.textContent = 'Too Warm';
+                tempStatusEl.className = 'status-warm';
+            } else {
+                tempStatusEl.textContent = 'Comfortable';
+                tempStatusEl.className = 'status-good';
+            }
+            
+            // Presence
+            const presenceActive = data.wellness_presence_active;
+            const presenceDot = document.getElementById('presenceDot');
+            const presenceText = document.getElementById('presenceText');
+            
+            if (presenceActive) {
+                presenceDot.classList.add('active');
+                presenceText.textContent = 'Present';
+            } else {
+                presenceDot.classList.remove('active');
+                presenceText.textContent = 'Not Present';
+            }
+            
+            document.getElementById('presenceLocation').textContent = data.wellness_current_presence_room;
+            document.getElementById('presenceDuration').textContent = `${data.wellness_last_presence_duration} min`;
+            document.getElementById('presenceEvents').textContent = data.wellness_daily_presence_events;
+            
+            // Hygiene stats
+            document.getElementById('morningShowers').textContent = data.wellness_morning_showers;
+            document.getElementById('eveningShowers').textContent = data.wellness_evening_showers;
+        }
+        
+        // Initial load
+        updateDashboard();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(updateDashboard, 30000);
+        
+        // Dashboard menu toggle
+        function toggleDashboardMenu() {
+            const menu = document.getElementById('dashboardMenu');
+            menu.classList.toggle('open');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('dashboardMenu');
+            const button = document.querySelector('.nav-select');
+            if (menu && !menu.contains(e.target) && !button.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TellaBoomer Family Dashboard - Peace of Mind Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 100px 20px 20px 20px;
+            color: var(--gray-800);
+        }
+        
+        /* NAVIGATION HEADER */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+        
+        .nav-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .nav-select-wrapper {
+            position: relative;
+        }
+        
+        .nav-select {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-select:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(30, 41, 59, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            min-width: 280px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 1002;
+        }
+        
+        .nav-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .nav-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .nav-dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+        }
+        
+        .nav-dropdown-item.active {
+            background: rgba(102, 126, 234, 0.3);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* CRITICAL FALL ALERT BANNER */
+        .fall-alert-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .fall-alert-banner.active {
+            display: block;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .fall-alert-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .fall-alert-icon {
+            font-size: 3rem;
+            animation: shake 0.5s infinite;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .fall-alert-text h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .fall-alert-text p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .fall-alert-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .fall-alert-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .fall-alert-btn.primary {
+            background: white;
+            color: var(--danger);
+        }
+        
+        .fall-alert-btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .fall-alert-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .header-left p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .last-update {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* MAIN CONTENT */
+        .content {
+            padding: 40px;
+        }
+        
+        /* SECTION HEADERS */
+        .section-header {
+            margin-bottom: 24px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-header p {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+        }
+        
+        /* CARD GRID */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .card-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 16px;
+        }
+        
+        .card-detail {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-100);
+        }
+        
+        /* PROGRESS CIRCLE */
+        .progress-circle-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 20px auto;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .progress-number {
+            display: block;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+        
+        .progress-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-top: 8px;
+        }
+        
+        /* CHECKLIST */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .checklist-item.checked {
+            background: #d1fae5;
+        }
+        
+        .check-icon {
+            font-size: 1.5rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .check-label {
+            flex: 1;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        .check-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* TEMPERATURE DISPLAY */
+        .temp-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .temp-value {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+        }
+        
+        .temp-unit {
+            font-size: 2rem;
+            color: var(--gray-500);
+        }
+        
+        .comfort-bar {
+            height: 12px;
+            background: linear-gradient(90deg, #3b82f6, #10b981, #f59e0b, #ef4444);
+            border-radius: 6px;
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .comfort-indicator {
+            position: absolute;
+            top: -4px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid var(--gray-800);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+        }
+        
+        .comfort-range {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 8px;
+        }
+        
+        .comfort-status {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 12px;
+        }
+        
+        .comfort-status.good {
+            color: var(--success);
+        }
+        
+        .comfort-status.cold {
+            color: var(--info);
+        }
+        
+        .comfort-status.warm {
+            color: var(--warning);
+        }
+        
+        /* STATUS BADGES */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.good {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.ok {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-badge.concern {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* SLEEP QUALITY */
+        .sleep-score-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .sleep-score {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+        
+        .sleep-rating {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            margin-top: 8px;
+        }
+        
+        .sleep-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .sleep-detail {
+            text-align: center;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+        
+        .sleep-detail-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+        
+        .sleep-detail-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .fall-alert-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .fall-alert-actions {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .fall-alert-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION HEADER -->
+    <div class="nav-header">
+        <button class="nav-back" onclick="window.location.href='TellaBoomer_Gallery_v2.5.html'">
+            ← Back to Gallery
+        </button>
+        <div class="nav-title">Family Caregiver Dashboard</div>
+        <div class="nav-select-wrapper">
+            <button class="nav-select" onclick="toggleDashboardMenu()">
+                Switch Dashboard ▼
+            </button>
+            <div class="nav-dropdown" id="dashboardMenu">
+                <a href="TellaBoomer_Family_Dashboard_v2.5.html" class="nav-dropdown-item active">
+                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
+                    <span>Family Caregiver</span>
+                </a>
+                <a href="TellaBoomer_Clinical_Assessment_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Clinical Assessment</span>
+                </a>
+                <a href="TellaBoomer_Movement_Patterns_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Movement Patterns</span>
+                </a>
+                <a href="TellaBoomer_OT_Narrative_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">📖</span>
+                    <span>OT Narrative</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRITICAL FALL ALERT BANNER -->
+    <div class="fall-alert-banner" id="fallAlert">
+        <div class="fall-alert-content">
+            <div class="fall-alert-icon">🚨</div>
+            <div class="fall-alert-text">
+                <h2>FALL DETECTED</h2>
+                <p id="fallDetails">Loading details...</p>
+            </div>
+            <div class="fall-alert-actions">
+                <button class="fall-alert-btn primary" onclick="callHelp()">Call for Help</button>
+                <button class="fall-alert-btn secondary" onclick="acknowledgeFall()">I'm Aware</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <h1>🏠 Family Care Dashboard</h1>
+                <p>Peace-of-Mind Monitoring for Your Loved One</p>
+            </div>
+            <div class="header-right">
+                <div class="last-update">Last updated: <span id="lastUpdate">--:--</span></div>
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Connected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+            <!-- CRITICAL SAFETY METRICS -->
+            <div class="section-header">
+                <h2>🛡️ Safety & Critical Indicators</h2>
+                <p>Real-time monitoring of critical safety metrics</p>
+            </div>
+
+            <div class="card-grid">
+                <!-- Overall Wellness -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">💚</span>
+                        <span class="card-title">Overall Wellness</span>
+                    </div>
+                    <div class="card-value" id="wellnessScore">--</div>
+                    <div class="card-label">Out of 100</div>
+                    <div class="card-detail">
+                        Status: <span id="wellnessStatus" class="status-badge good">Excellent</span>
+                    </div>
+                </div>
+
+                <!-- Fall Detection Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🚨</span>
+                        <span class="card-title">Fall Detection</span>
+                    </div>
+                    <div class="card-value" id="fallStatus" style="font-size: 2rem;">No Falls</div>
+                    <div class="card-label">Today</div>
+                    <div class="card-detail">
+                        Monitoring: <span class="status-badge good">✓ Active</span>
+                    </div>
+                </div>
+
+                <!-- Temperature Comfort -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🌡️</span>
+                        <span class="card-title">Home Comfort</span>
+                    </div>
+                    <div class="temp-display">
+                        <span class="temp-value" id="avgTemp">--</span>
+                        <span class="temp-unit">°F</span>
+                    </div>
+                    <div class="comfort-bar">
+                        <div class="comfort-indicator" id="tempIndicator"></div>
+                    </div>
+                    <div class="comfort-range">
+                        <span>60°</span>
+                        <span style="font-weight: 600;">Comfort: 68-76°</span>
+                        <span>85°</span>
+                    </div>
+                    <div class="comfort-status good" id="comfortStatus">Comfortable</div>
+                </div>
+            </div>
+
+            <!-- DAILY WELLNESS ROUTINE -->
+            <div class="section-header" style="margin-top: 40px;">
+                <h2>✓ Today's Wellness Routine</h2>
+                <p>Daily activities and self-care tracking</p>
+            </div>
+
+            <div class="card-grid">
+                <!-- Sleep Quality -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">😴</span>
+                        <span class="card-title">Sleep Quality</span>
+                    </div>
+                    <div class="sleep-score-display">
+                        <div class="sleep-score" id="sleepScore">--</div>
+                        <div class="sleep-rating" id="sleepRating">Checking...</div>
+                    </div>
+                    <div class="sleep-details">
+                        <div class="sleep-detail">
+                            <div class="sleep-detail-label">Time in Bed</div>
+                            <div class="sleep-detail-value" id="timeInBed">--</div>
+                        </div>
+                        <div class="sleep-detail">
+                            <div class="sleep-detail-label">Restlessness</div>
+                            <div class="sleep-detail-value" id="restlessness">--%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Checklist -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📋</span>
+                        <span class="card-title">Daily Checklist</span>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-item" id="toiletCheck">
+                            <div class="check-icon">⭕</div>
+                            <div class="check-label">Bathroom visits</div>
+                            <div class="check-value" id="toiletCount">--</div>
+                        </div>
+                        <div class="checklist-item" id="showerCheck">
+                            <div class="check-icon">⭕</div>
+                            <div class="check-label">Showered today</div>
+                            <div class="check-value" id="showerTime">--</div>
+                        </div>
+                        <div class="checklist-item" id="activityCheck">
+                            <div class="check-icon">⭕</div>
+                            <div class="check-label">Active & moving</div>
+                            <div class="check-value" id="activityLevel">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Hygiene Adherence -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🚿</span>
+                        <span class="card-title">Hygiene This Week</span>
+                    </div>
+                    <div class="progress-circle-container">
+                        <svg class="progress-circle" width="180" height="180">
+                            <circle cx="90" cy="90" r="75" 
+                                    fill="none" 
+                                    stroke="#e5e7eb" 
+                                    stroke-width="12"/>
+                            <circle id="showerProgressCircle"
+                                    cx="90" cy="90" r="75"
+                                    fill="none"
+                                    stroke="#8b5cf6"
+                                    stroke-width="12"
+                                    stroke-dasharray="471"
+                                    stroke-dashoffset="471"
+                                    transform="rotate(-90 90 90)"
+                                    style="transition: stroke-dashoffset 1s ease;"/>
+                        </svg>
+                        <div class="progress-text">
+                            <span id="showerAdherence" class="progress-number">--</span>
+                            <span class="progress-label">% of days</span>
+                        </div>
+                    </div>
+                    <div class="card-detail" style="text-align: center; border: none;">
+                        <div id="showerDaysCount" style="font-size: 1.1rem; font-weight: 600; color: var(--gray-700);">-- showers this week</div>
+                        <div id="adherenceStatus" style="margin-top: 12px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIVITY SUMMARY -->
+            <div class="section-header" style="margin-top: 40px;">
+                <h2>🏃 Activity & Movement</h2>
+                <p>Daily movement patterns and bathroom visits</p>
+            </div>
+
+            <div class="card-grid">
+                <!-- Bathroom Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🚽</span>
+                        <span class="card-title">Bathroom Activity</span>
+                    </div>
+                    <div class="card-value" id="bathroomVisits">--</div>
+                    <div class="card-label">Visits today</div>
+                    <div class="card-detail">
+                        Toilet flushes: <strong id="toiletFlushes">--</strong><br>
+                        Last visit: <strong id="lastFlushTime">--</strong>
+                    </div>
+                </div>
+
+                <!-- Movement Events -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">👣</span>
+                        <span class="card-title">Movement Events</span>
+                    </div>
+                    <div class="card-value" id="totalEvents">--</div>
+                    <div class="card-label">Detected today</div>
+                    <div class="card-detail">
+                        Current location: <strong id="currentLocation">--</strong>
+                    </div>
+                </div>
+
+                <!-- Presence Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">👤</span>
+                        <span class="card-title">Presence Status</span>
+                    </div>
+                    <div class="card-value" id="presenceStatus" style="font-size: 1.8rem;">Checking...</div>
+                    <div class="card-label" id="presenceLocation">--</div>
+                    <div class="card-detail">
+                        Duration: <strong id="presenceDuration">--</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const MAKER_API_URL = 'YOUR_MAKER_API_URL_HERE'; // Replace with your actual Maker API URL
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+
+        // Update dashboard
+        async function updateDashboard() {
+            try {
+                // In production, fetch from your Maker API
+                // const response = await fetch(MAKER_API_URL);
+                // const hubData = await response.json();
+                
+                // Demo data for preview
+                const hubData = {
+                    // Critical safety
+                    wellness_overnight_score: 85,
+                    wellness_fall_detected: false,
+                    wellness_fall_time: '',
+                    wellness_fall_location: '',
+                    wellness_fall_count_today: 0,
+                    wellness_avg_temperature: 72,
+                    
+                    // Sleep quality
+                    wellness_sleep_quality_score: 82,
+                    wellness_total_bed_time: 480, // minutes
+                    wellness_sleep_restlessness: 12,
+                    wellness_in_bed: false,
+                    
+                    // Daily routine
+                    wellness_toilet_flushes: 5,
+                    wellness_bathroom_visits: 6,
+                    wellness_last_flush_time: '2:45 PM',
+                    wellness_daily_showers: 1,
+                    wellness_last_shower_time: '8:30 AM',
+                    wellness_total_events: 342,
+                    wellness_current_location: 'Living Room',
+                    
+                    // Hygiene adherence
+                    wellness_shower_adherence_percent: 86,
+                    wellness_shower_days_7day: 6,
+                    
+                    // Presence
+                    wellness_presence_active: true,
+                    wellness_current_presence_room: 'Living Room',
+                    wellness_last_presence_duration: 45
+                };
+                
+                // Update all metrics
+                updateSafetyMetrics(hubData);
+                updateDailyRoutine(hubData);
+                updateActivityMetrics(hubData);
+                
+                // Update timestamp
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+            }
+        }
+        
+        function updateSafetyMetrics(data) {
+            // Overall wellness
+            const score = data.wellness_overnight_score || 0;
+            document.getElementById('wellnessScore').textContent = score;
+            
+            const statusEl = document.getElementById('wellnessStatus');
+            if (score >= 80) {
+                statusEl.textContent = 'Excellent';
+                statusEl.className = 'status-badge good';
+            } else if (score >= 60) {
+                statusEl.textContent = 'Good';
+                statusEl.className = 'status-badge ok';
+            } else {
+                statusEl.textContent = 'Needs Attention';
+                statusEl.className = 'status-badge concern';
+            }
+            
+            // Fall detection
+            const fallDetected = data.wellness_fall_detected;
+            const fallCount = data.wellness_fall_count_today || 0;
+            
+            if (fallDetected || fallCount > 0) {
+                document.getElementById('fallStatus').textContent = `${fallCount} Fall${fallCount !== 1 ? 's' : ''}`;
+                document.getElementById('fallStatus').style.color = 'var(--danger)';
+                
+                // Show critical alert banner
+                const fallAlert = document.getElementById('fallAlert');
+                fallAlert.classList.add('active');
+                document.getElementById('fallDetails').textContent = 
+                    `Fall detected in ${data.wellness_fall_location || 'unknown location'} at ${data.wellness_fall_time || 'unknown time'}`;
+                    
+                // Request notification permission and show
+                if (Notification.permission === "granted") {
+                    new Notification("🚨 FALL DETECTED", {
+                        body: `Fall detected in ${data.wellness_fall_location}`,
+                        requireInteraction: true,
+                        tag: 'fall-alert'
+                    });
+                }
+            } else {
+                document.getElementById('fallStatus').textContent = 'No Falls';
+                document.getElementById('fallStatus').style.color = 'var(--success)';
+            }
+            
+            // Temperature comfort
+            const temp = data.wellness_avg_temperature || 72;
+            document.getElementById('avgTemp').textContent = Math.round(temp);
+            
+            // Temperature indicator position (60-85°F range)
+            const tempRange = 85 - 60;
+            const position = ((temp - 60) / tempRange) * 100;
+            document.getElementById('tempIndicator').style.left = `${Math.max(0, Math.min(100, position))}%`;
+            
+            const comfortStatusEl = document.getElementById('comfortStatus');
+            if (temp < 68) {
+                comfortStatusEl.textContent = '❄️ Too Cold';
+                comfortStatusEl.className = 'comfort-status cold';
+            } else if (temp > 76) {
+                comfortStatusEl.textContent = '🔥 Too Warm';
+                comfortStatusEl.className = 'comfort-status warm';
+            } else {
+                comfortStatusEl.textContent = '✓ Comfortable';
+                comfortStatusEl.className = 'comfort-status good';
+            }
+        }
+        
+        function updateDailyRoutine(data) {
+            // Sleep quality
+            const sleepScore = data.wellness_sleep_quality_score || 0;
+            document.getElementById('sleepScore').textContent = sleepScore;
+            
+            let rating = 'Excellent';
+            if (sleepScore < 80) rating = 'Good';
+            if (sleepScore < 60) rating = 'Fair';
+            if (sleepScore < 40) rating = 'Poor';
+            document.getElementById('sleepRating').textContent = rating;
+            
+            const bedTime = data.wellness_total_bed_time || 0;
+            const hours = Math.floor(bedTime / 60);
+            const mins = Math.round(bedTime % 60);
+            document.getElementById('timeInBed').textContent = `${hours}h ${mins}m`;
+            
+            const restlessness = data.wellness_sleep_restlessness || 0;
+            document.getElementById('restlessness').textContent = `${restlessness}%`;
+            
+            // Daily checklist
+            const toiletFlushes = data.wellness_toilet_flushes || 0;
+            const toiletCheck = document.getElementById('toiletCheck');
+            const toiletIcon = toiletCheck.querySelector('.check-icon');
+            
+            document.getElementById('toiletCount').textContent = `${toiletFlushes} times`;
+            if (toiletFlushes > 0) {
+                toiletCheck.classList.add('checked');
+                toiletIcon.textContent = '✓';
+                toiletIcon.style.background = 'var(--success)';
+                toiletIcon.style.color = 'white';
+            }
+            
+            const dailyShowers = data.wellness_daily_showers || 0;
+            const showerCheck = document.getElementById('showerCheck');
+            const showerIcon = showerCheck.querySelector('.check-icon');
+            const showerTime = data.wellness_last_shower_time || '--';
+            
+            document.getElementById('showerTime').textContent = dailyShowers > 0 ? showerTime : 'Not yet';
+            if (dailyShowers > 0) {
+                showerCheck.classList.add('checked');
+                showerIcon.textContent = '✓';
+                showerIcon.style.background = 'var(--success)';
+                showerIcon.style.color = 'white';
+            }
+            
+            const totalEvents = data.wellness_total_events || 0;
+            const activityCheck = document.getElementById('activityCheck');
+            const activityIcon = activityCheck.querySelector('.check-icon');
+            
+            document.getElementById('activityLevel').textContent = totalEvents > 100 ? 'Very Active' : totalEvents > 50 ? 'Active' : 'Light';
+            if (totalEvents > 50) {
+                activityCheck.classList.add('checked');
+                activityIcon.textContent = '✓';
+                activityIcon.style.background = 'var(--success)';
+                activityIcon.style.color = 'white';
+            }
+            
+            // Hygiene adherence
+            const adherence = data.wellness_shower_adherence_percent || 0;
+            const showerDays = data.wellness_shower_days_7day || 0;
+            
+            document.getElementById('showerAdherence').textContent = adherence;
+            document.getElementById('showerDaysCount').textContent = `${showerDays} shower${showerDays !== 1 ? 's' : ''} this week`;
+            
+            // Update progress circle
+            const circumference = 471; // 2 * π * 75
+            const offset = circumference - (circumference * adherence / 100);
+            document.getElementById('showerProgressCircle').style.strokeDashoffset = offset;
+            
+            // Adherence status
+            const statusEl = document.getElementById('adherenceStatus');
+            if (adherence >= 85) {
+                statusEl.innerHTML = '<span class="status-badge good">✓ Great routine!</span>';
+            } else if (adherence >= 60) {
+                statusEl.innerHTML = '<span class="status-badge ok">→ Doing okay</span>';
+            } else {
+                statusEl.innerHTML = '<span class="status-badge concern">⚠ May need support</span>';
+            }
+        }
+        
+        function updateActivityMetrics(data) {
+            // Bathroom activity
+            const visits = data.wellness_bathroom_visits || 0;
+            const flushes = data.wellness_toilet_flushes || 0;
+            const lastFlush = data.wellness_last_flush_time || '--';
+            
+            document.getElementById('bathroomVisits').textContent = visits;
+            document.getElementById('toiletFlushes').textContent = flushes;
+            document.getElementById('lastFlushTime').textContent = lastFlush;
+            
+            // Movement events
+            const events = data.wellness_total_events || 0;
+            const location = data.wellness_current_location || '--';
+            
+            document.getElementById('totalEvents').textContent = events;
+            document.getElementById('currentLocation').textContent = location;
+            
+            // Presence status
+            const presenceActive = data.wellness_presence_active;
+            const presenceRoom = data.wellness_current_presence_room || '--';
+            const duration = data.wellness_last_presence_duration || 0;
+            
+            document.getElementById('presenceStatus').textContent = presenceActive ? '✓ Present' : 'Not Detected';
+            document.getElementById('presenceStatus').style.color = presenceActive ? 'var(--success)' : 'var(--gray-400)';
+            document.getElementById('presenceLocation').textContent = presenceActive ? presenceRoom : 'No activity';
+            document.getElementById('presenceDuration').textContent = duration > 0 ? `${Math.round(duration)} minutes` : '--';
+        }
+        
+        function acknowledgeFall() {
+            document.getElementById('fallAlert').classList.remove('active');
+            // In production, you might want to send an API call to acknowledge the fall
+            console.log('Fall acknowledged by family member');
+        }
+        
+        function callHelp() {
+            // In production, this would trigger emergency protocols
+            alert('Emergency services would be contacted in production.\n\nThis is a demo version.');
+            console.log('Emergency help requested');
+        }
+        
+        // Request notification permission on load
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+        
+        // Initial load
+        updateDashboard();
+        
+        // Auto-refresh
+        setInterval(updateDashboard, REFRESH_INTERVAL);
+        
+        // Dashboard menu toggle
+        function toggleDashboardMenu() {
+            const menu = document.getElementById('dashboardMenu');
+            menu.classList.toggle('open');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('dashboardMenu');
+            const button = document.querySelector('.nav-select');
+            if (menu && !menu.contains(e.target) && !button.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

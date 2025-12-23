@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TellaBoomer Dashboard Gallery v2.5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+        
+        .dashboard-card {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        .dashboard-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+        
+        .dashboard-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .dashboard-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .dashboard-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .dashboard-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .feature-pill {
+            background: rgba(102, 126, 234, 0.2);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+        
+        .btn-launch {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-launch:hover {
+            transform: translateX(4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="Teal_Enhanced_small.png" alt="TellaBoomer Logo" style="height: 200px; margin-bottom: 20px; animation: float 3s ease-in-out infinite;">
+        <h1>TellaBoomer RPM Dashboard Gallery</h1>
+        <p>Production-ready wellness monitoring dashboards with mobile-optimized tooltip education</p>
+        <div class="version-badge">Version 2.5 • 4 Complete Dashboards</div>
+    </div>
+    
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+    
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- Family Caregiver Dashboard -->
+            <div class="dashboard-card" onclick="window.location.href='TellaBoomer_Family_Dashboard_v2.5.html'">
+                <span class="dashboard-icon">👨‍👩‍👧‍👦</span>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    Production Ready
+                </div>
+                <h2 class="dashboard-title">Family Caregiver Dashboard</h2>
+                <p class="dashboard-description">
+                    Peace-of-mind monitoring for family members. Real-time fall alerts, daily wellness scoring, hygiene tracking, and sleep quality visualization.
+                </p>
+                <div class="dashboard-features">
+                    <span class="feature-pill">🚨 Fall Detection</span>
+                    <span class="feature-pill">💯 Wellness Score</span>
+                    <span class="feature-pill">🚿 Hygiene Tracking</span>
+                    <span class="feature-pill">😴 Sleep Quality</span>
+                    <span class="feature-pill">ⓘ 8 Tooltips</span>
+                </div>
+                <a href="TellaBoomer_Family_Dashboard_v2.5.html" class="btn-launch" onclick="event.stopPropagation();">
+                    Launch Dashboard →
+                </a>
+            </div>
+            
+            <!-- Clinical Assessment Dashboard -->
+            <div class="dashboard-card" onclick="window.location.href='TellaBoomer_Clinical_Assessment_Dashboard_v2.5.html'">
+                <span class="dashboard-icon">👨‍⚕️</span>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    Production Ready
+                </div>
+                <h2 class="dashboard-title">Clinical Assessment Dashboard</h2>
+                <p class="dashboard-description">
+                    Professional occupational therapy assessment with FIM scoring integration. Complete ADL monitoring, fall risk analysis, and clinical metrics.
+                </p>
+                <div class="dashboard-features">
+                    <span class="feature-pill">📊 FIM Scoring</span>
+                    <span class="feature-pill">🎯 6/6 ADL Tracking</span>
+                    <span class="feature-pill">⚠️ Risk Assessment</span>
+                    <span class="feature-pill">📈 Clinical Metrics</span>
+                    <span class="feature-pill">ⓘ 12 Tooltips</span>
+                </div>
+                <a href="TellaBoomer_Clinical_Assessment_Dashboard_v2.5.html" class="btn-launch" onclick="event.stopPropagation();">
+                    Launch Dashboard →
+                </a>
+            </div>
+            
+            <!-- Movement Patterns Dashboard -->
+            <div class="dashboard-card" onclick="window.location.href='TellaBoomer_Movement_Patterns_Dashboard_v2.5.html'">
+                <span class="dashboard-icon">📊</span>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    Production Ready
+                </div>
+                <h2 class="dashboard-title">Movement Patterns Analytics</h2>
+                <p class="dashboard-description">
+                    Advanced sensor correlation and pattern detection. 24-hour heatmaps, correlation matrices, room-by-room analysis, and AI-powered insights.
+                </p>
+                <div class="dashboard-features">
+                    <span class="feature-pill">🔬 Correlation Analysis</span>
+                    <span class="feature-pill">🌡️ 24h Heatmaps</span>
+                    <span class="feature-pill">🏠 Room Analysis</span>
+                    <span class="feature-pill">🤖 AI Insights</span>
+                    <span class="feature-pill">ⓘ 13 Tooltips</span>
+                </div>
+                <a href="TellaBoomer_Movement_Patterns_Dashboard_v2.5.html" class="btn-launch" onclick="event.stopPropagation();">
+                    Launch Dashboard →
+                </a>
+            </div>
+            
+            <!-- OT Narrative Dashboard -->
+            <div class="dashboard-card" onclick="window.location.href='TellaBoomer_OT_Narrative_Dashboard_v2.5.html'">
+                <span class="dashboard-icon">📖</span>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    Production Ready
+                </div>
+                <h2 class="dashboard-title">OT Narrative Dashboard</h2>
+                <p class="dashboard-description">
+                    Clinical storytelling with dignity and warmth. Weekly wellness narratives, expandable clinical observations, and FIM scoring summaries.
+                </p>
+                <div class="dashboard-features">
+                    <span class="feature-pill">📝 Storytelling</span>
+                    <span class="feature-pill">👁️ Observations</span>
+                    <span class="feature-pill">➕ Expandable Cards</span>
+                    <span class="feature-pill">💬 Warm Narratives</span>
+                    <span class="feature-pill">ⓘ 6 Tooltips</span>
+                </div>
+                <a href="TellaBoomer_OT_Narrative_Dashboard_v2.5.html" class="btn-launch" onclick="event.stopPropagation();">
+                    Launch Dashboard →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

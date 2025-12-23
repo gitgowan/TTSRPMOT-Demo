@@ -1,0 +1,2653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TellaBoomer Movement Patterns Dashboard v2.5 - Advanced Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #0f1419;
+            color: #e5e7eb;
+            padding-top: 80px; /* Space for fixed nav */
+        }
+        
+        /* NAVIGATION HEADER */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(-4px);
+        }
+        
+        .nav-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .nav-select-wrapper {
+            position: relative;
+        }
+        
+        .nav-select {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-select:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(30, 41, 59, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            min-width: 280px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 1002;
+        }
+        
+        .nav-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .nav-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .nav-dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: white;
+        }
+        
+        .nav-dropdown-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, #667eea, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .time-selector {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #e5e7eb;
+            font-size: 0.9rem;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* CONTENT */
+        .content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        
+        /* SECTION HEADERS */
+        .section-header {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-icon {
+            font-size: 1.8rem;
+        }
+        
+        .section-subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+        
+        /* METRICS GRID */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+        
+        .metric-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+        
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .metric-icon {
+            font-size: 2rem;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .metric-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .metric-change.up {
+            color: var(--success);
+        }
+        
+        .metric-change.down {
+            color: var(--danger);
+        }
+        
+        .metric-change.neutral {
+            color: #94a3b8;
+        }
+        
+        /* CHART CONTAINER */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .chart-subtitle {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        
+        .chart-canvas-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        
+        /* TWO COLUMN LAYOUT */
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        /* HEATMAP */
+        .heatmap-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 4px;
+            margin-top: 20px;
+        }
+        
+        .heatmap-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
+        }
+        
+        .heatmap-cell.intensity-0 { background: rgba(59, 130, 246, 0.1); }
+        .heatmap-cell.intensity-1 { background: rgba(59, 130, 246, 0.3); }
+        .heatmap-cell.intensity-2 { background: rgba(59, 130, 246, 0.5); }
+        .heatmap-cell.intensity-3 { background: rgba(59, 130, 246, 0.7); }
+        .heatmap-cell.intensity-4 { background: rgba(59, 130, 246, 0.9); }
+        .heatmap-cell.intensity-5 { background: rgba(139, 92, 246, 1); }
+        
+        .heatmap-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        /* ROOM ACTIVITY */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .room-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .room-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .room-card.active {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: var(--primary);
+        }
+        
+        .room-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        
+        .room-name {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+        }
+        
+        .room-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .room-stat {
+            text-align: center;
+        }
+        
+        .room-stat-value {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .room-stat-label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        /* CORRELATION MATRIX */
+        .correlation-matrix {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 150px repeat(4, 1fr);
+            gap: 2px;
+            margin-top: 20px;
+        }
+        
+        .matrix-cell {
+            padding: 12px;
+            text-align: center;
+            font-size: 0.875rem;
+            border-radius: 4px;
+        }
+        
+        .matrix-cell.header {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        
+        .matrix-cell.label {
+            background: rgba(255, 255, 255, 0.05);
+            text-align: left;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        
+        .matrix-cell.value {
+            background: rgba(255, 255, 255, 0.03);
+            color: #f1f5f9;
+        }
+        
+        .matrix-cell.high {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .matrix-cell.medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--warning);
+        }
+        
+        .matrix-cell.low {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+        
+        /* INSIGHT CARDS */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .insight-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .insight-card.warning {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+        
+        .insight-card.success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .insight-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .insight-description {
+            color: #94a3b8;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .two-col-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* TABLET OPTIMIZATIONS */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .content {
+                padding: 32px;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .insights-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 130px; /* More space for wrapped nav */
+            }
+            
+            .nav-header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .nav-title {
+                flex: 0 0 100%;
+                order: -1;
+                text-align: left;
+                font-size: 1rem;
+            }
+            
+            .nav-back, .nav-select {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+            
+            .nav-dropdown {
+                right: 0;
+                left: 0;
+                margin: 0 16px;
+                min-width: auto;
+            }
+            .content {
+                padding: 20px 16px;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .metric-card {
+                padding: 20px;
+            }
+            
+            .chart-container {
+                padding: 20px;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            /* Make touch targets larger */
+            .time-selector {
+                padding: 10px 16px;
+                font-size: 1rem;
+                width: 100%;
+            }
+            
+            /* Simplify heatmap on mobile */
+            .heatmap-grid {
+                gap: 2px;
+            }
+            
+            /* Stack room cards on very small screens */
+            .room-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 12px;
+            }
+            
+            /* Adjust correlation matrix for mobile */
+            .matrix-grid {
+                font-size: 0.75rem;
+                gap: 1px;
+            }
+            
+            .matrix-cell {
+                padding: 8px 4px;
+            }
+            
+            /* Welcome modal adjustments */
+            .welcome-modal {
+                max-width: calc(100% - 40px);
+                padding: 24px;
+            }
+            
+            .welcome-icon-text {
+                font-size: 0.75rem;
+            }
+            
+            /* Tour tooltip full width */
+            .tour-tooltip {
+                max-width: calc(100% - 32px) !important;
+                left: 16px !important;
+                right: 16px !important;
+                transform: none !important;
+            }
+            
+            /* Prevent zoom on double-tap */
+            * {
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Prevent rubber-band scrolling in panels */
+            .info-panel {
+                overscroll-behavior: contain;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION HEADER -->
+    <div class="nav-header">
+        <button class="nav-back" onclick="window.location.href='TellaBoomer_Gallery_v2.5.html'">
+            ← Back to Gallery
+        </button>
+        <div class="nav-title">Movement Patterns Dashboard</div>
+        <div class="nav-select-wrapper">
+            <button class="nav-select" onclick="toggleDashboardMenu()">
+                Switch Dashboard ▼
+            </button>
+            <div class="nav-dropdown" id="dashboardMenu">
+                <a href="TellaBoomer_Family_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
+                    <span>Family Caregiver</span>
+                </a>
+                <a href="TellaBoomer_Clinical_Assessment_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Clinical Assessment</span>
+                </a>
+                <a href="TellaBoomer_Movement_Patterns_Dashboard_v2.5.html" class="nav-dropdown-item active">
+                    <span class="nav-icon">📊</span>
+                    <span>Movement Patterns</span>
+                </a>
+                <a href="TellaBoomer_OT_Narrative_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">📖</span>
+                    <span>OT Narrative</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>📊 Movement Patterns Analytics</h1>
+                <p>Advanced sensor correlation and pattern detection</p>
+            </div>
+            <div class="header-controls">
+                <select class="time-selector" id="timeRange">
+                    <option value="24h">Last 24 Hours</option>
+                    <option value="7d" selected>Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                </select>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Live Monitoring</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+        <!-- KEY METRICS -->
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="section-icon">🎯</span>
+                Key Movement Metrics
+            </h2>
+            <p class="section-subtitle">Comprehensive activity patterns from multi-sensor integration</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">👣</span>
+                    <span class="metric-label">
+                        Total Events
+                        <button class="info-btn" onclick="openInfoPanel('total-events')" 
+                                data-hover-tip="Motion sensors count each movement detected. Normal range: 250-400 events/day">ⓘ</button>
+                    </span>
+                </div>
+                <div class="metric-value">2,394</div>
+                <div class="metric-change up">
+                    <span>↑ 8%</span>
+                    <span style="color: #94a3b8;">vs last week</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">⏱️</span>
+                    <span class="metric-label">
+                        Active Time
+                        <button class="info-btn" onclick="openInfoPanel('active-time')"
+                                data-hover-tip="Total time with movement or presence detected. Typical: 12-16 hours/day">ⓘ</button>
+                    </span>
+                </div>
+                <div class="metric-value">14.2<span style="font-size: 1.2rem; color: #94a3b8;">hrs</span></div>
+                <div class="metric-change neutral">
+                    <span>→ Stable</span>
+                    <span style="color: #94a3b8;">within baseline</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">🛋️</span>
+                    <span class="metric-label">
+                        Stillness Time
+                        <button class="info-btn" onclick="openInfoPanel('stillness-time')"
+                                data-hover-tip="Periods with presence but no motion. Includes resting, reading, watching TV.">ⓘ</button>
+                    </span>
+                </div>
+                <div class="metric-value">9.8<span style="font-size: 1.2rem; color: #94a3b8;">hrs</span></div>
+                <div class="metric-change down">
+                    <span>↓ 12%</span>
+                    <span style="color: #94a3b8;">more active</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">🎯</span>
+                    <span class="metric-label">
+                        Presence Sessions
+                        <button class="info-btn" onclick="openInfoPanel('presence-sessions')"
+                                data-hover-tip="Number of distinct room occupancy periods. More sessions = more room transitions.">ⓘ</button>
+                    </span>
+                </div>
+                <div class="metric-value">58</div>
+                <div class="metric-change up">
+                    <span>↑ 5%</span>
+                    <span style="color: #94a3b8;">vs last week</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">🏠</span>
+                    <span class="metric-label">
+                        Room Transitions
+                        <button class="info-btn" onclick="openInfoPanel('room-transitions')"
+                                data-hover-tip="Times moving between rooms. Normal: 120-180/day for active adults.">ⓘ</button>
+                    </span>
+                </div>
+                <div class="metric-value">147</div>
+                <div class="metric-change neutral">
+                    <span>→ Normal</span>
+                    <span style="color: #94a3b8;">expected range</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">💤</span>
+                    <span class="metric-label">
+                        Avg Session Length
+                        <button class="info-btn" onclick="openInfoPanel('session-length')"
+                                data-hover-tip="Average time spent in a room per visit. Longer = more engaged activities.">ⓘ</button>
+                    </span>
+                </div>
+                <div class="metric-value">24.6<span style="font-size: 1.2rem; color: #94a3b8;">min</span></div>
+                <div class="metric-change up">
+                    <span>↑ 3%</span>
+                    <span style="color: #94a3b8;">longer stays</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRESENCE VS MOTION CORRELATION -->
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Presence vs Motion Correlation
+            </h2>
+            <p class="section-subtitle">mmWave presence detection overlaid with traditional motion sensors</p>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">
+                        24-Hour Activity Correlation
+                        <button class="info-btn" onclick="openInfoPanel('correlation-chart')"
+                                data-hover-tip="Shows how mmWave presence (blue) and motion sensors (green) track together">ⓘ</button>
+                    </div>
+                    <div class="chart-subtitle">Blue = mmWave Presence | Green = Motion Events</div>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>Presence Duration (min)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Motion Events (count)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+                <canvas id="correlationChart"></canvas>
+            </div>
+        </div>
+
+        <!-- STILLNESS HEATMAP -->
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="section-icon">⏰</span>
+                Stillness Duration Heatmap
+            </h2>
+            <p class="section-subtitle">Average stillness duration by hour (darker = longer stillness periods)</p>
+        </div>
+
+        <div class="heatmap-container">
+            <div class="chart-header">
+                <div class="chart-title">7-Day Stillness Pattern Analysis</div>
+            </div>
+            <div class="heatmap-grid" id="stillnessHeatmap">
+                <!-- Generated by JavaScript -->
+            </div>
+            <div class="heatmap-labels">
+                <span>12 AM</span>
+                <span>6 AM</span>
+                <span>12 PM</span>
+                <span>6 PM</span>
+                <span>11 PM</span>
+            </div>
+        </div>
+
+        <!-- TWO COLUMN CHARTS -->
+        <div class="two-col-grid">
+            <!-- ROOM DISTRIBUTION -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Room Time Distribution</div>
+                        <div class="chart-subtitle">Presence duration by location</div>
+                    </div>
+                </div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="roomDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ACTIVITY INTENSITY -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Activity Intensity by Time</div>
+                        <div class="chart-subtitle">Movement events per hour</div>
+                    </div>
+                </div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="intensityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROOM ACTIVITY CARDS -->
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="section-icon">🏠</span>
+                Room-by-Room Analysis
+            </h2>
+            <p class="section-subtitle">Click a room for detailed breakdown</p>
+        </div>
+
+        <div class="room-grid">
+            <div class="room-card active" onclick="selectRoom('living-room')">
+                <div class="room-icon">🛋️</div>
+                <div class="room-name">Living Room</div>
+                <div class="room-stats">
+                    <div class="room-stat">
+                        <div class="room-stat-value">4.2h</div>
+                        <div class="room-stat-label">Presence</div>
+                    </div>
+                    <div class="room-stat">
+                        <div class="room-stat-value">127</div>
+                        <div class="room-stat-label">Events</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-card" onclick="selectRoom('bedroom')">
+                <div class="room-icon">🛏️</div>
+                <div class="room-name">Bedroom</div>
+                <div class="room-stats">
+                    <div class="room-stat">
+                        <div class="room-stat-value">8.0h</div>
+                        <div class="room-stat-label">Presence</div>
+                    </div>
+                    <div class="room-stat">
+                        <div class="room-stat-value">48</div>
+                        <div class="room-stat-label">Events</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-card" onclick="selectRoom('kitchen')">
+                <div class="room-icon">🍳</div>
+                <div class="room-name">Kitchen</div>
+                <div class="room-stats">
+                    <div class="room-stat">
+                        <div class="room-stat-value">2.8h</div>
+                        <div class="room-stat-label">Presence</div>
+                    </div>
+                    <div class="room-stat">
+                        <div class="room-stat-value">89</div>
+                        <div class="room-stat-label">Events</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-card" onclick="selectRoom('bathroom')">
+                <div class="room-icon">🚽</div>
+                <div class="room-name">Bathroom</div>
+                <div class="room-stats">
+                    <div class="room-stat">
+                        <div class="room-stat-value">1.1h</div>
+                        <div class="room-stat-label">Presence</div>
+                    </div>
+                    <div class="room-stat">
+                        <div class="room-stat-value">42</div>
+                        <div class="room-stat-label">Events</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-card" onclick="selectRoom('hallway')">
+                <div class="room-icon">🚪</div>
+                <div class="room-name">Hallway</div>
+                <div class="room-stats">
+                    <div class="room-stat">
+                        <div class="room-stat-value">0.5h</div>
+                        <div class="room-stat-label">Presence</div>
+                    </div>
+                    <div class="room-stat">
+                        <div class="room-stat-value">156</div>
+                        <div class="room-stat-label">Events</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CORRELATION MATRIX -->
+        <div class="section-header" style="margin-top: 40px;">
+            <h2 class="section-title">
+                <span class="section-icon">📊</span>
+                Cross-Sensor Correlation Matrix
+            </h2>
+            <p class="section-subtitle">Correlation coefficients between different sensor types (1.0 = perfect correlation)</p>
+        </div>
+
+        <div class="correlation-matrix">
+            <div class="matrix-grid">
+                <!-- Header Row -->
+                <div class="matrix-cell header"></div>
+                <div class="matrix-cell header">Motion</div>
+                <div class="matrix-cell header">mmWave</div>
+                <div class="matrix-cell header">Toilet</div>
+                <div class="matrix-cell header">Shower</div>
+                
+                <!-- Motion Row -->
+                <div class="matrix-cell label">Motion Sensors</div>
+                <div class="matrix-cell value">1.00</div>
+                <div class="matrix-cell high">0.87</div>
+                <div class="matrix-cell medium">0.62</div>
+                <div class="matrix-cell medium">0.58</div>
+                
+                <!-- mmWave Row -->
+                <div class="matrix-cell label">mmWave Presence</div>
+                <div class="matrix-cell high">0.87</div>
+                <div class="matrix-cell value">1.00</div>
+                <div class="matrix-cell medium">0.71</div>
+                <div class="matrix-cell medium">0.64</div>
+                
+                <!-- Toilet Row -->
+                <div class="matrix-cell label">Toilet Events</div>
+                <div class="matrix-cell medium">0.62</div>
+                <div class="matrix-cell medium">0.71</div>
+                <div class="matrix-cell value">1.00</div>
+                <div class="matrix-cell low">0.31</div>
+                
+                <!-- Shower Row -->
+                <div class="matrix-cell label">Shower Events</div>
+                <div class="matrix-cell medium">0.58</div>
+                <div class="matrix-cell medium">0.64</div>
+                <div class="matrix-cell low">0.31</div>
+                <div class="matrix-cell value">1.00</div>
+            </div>
+        </div>
+
+        <!-- AI INSIGHTS -->
+        <div class="section-header" style="margin-top: 40px;">
+            <h2 class="section-title">
+                <span class="section-icon">🤖</span>
+                Pattern Detection Insights
+            </h2>
+            <p class="section-subtitle">AI-identified patterns and anomalies from multi-sensor data</p>
+        </div>
+
+        <div class="insights-grid">
+            <div class="insight-card success" onclick="toggleInsight(this)">
+                <div class="insight-expand-btn">+</div>
+                <div class="insight-icon">✓</div>
+                <div class="insight-title">Consistent Daily Routine</div>
+                <div class="insight-description">
+                    Movement patterns show 92% consistency across 7 days. Morning routine (6-9 AM) and evening routine (6-9 PM) are highly predictable with minimal variation.
+                </div>
+                <div class="insight-expanded-content">
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">📋 What This Means</div>
+                        <div class="insight-detail-content">
+                            High consistency (>85%) indicates:
+                            <ul>
+                                <li>✓ Stable cognitive function - memory and planning intact</li>
+                                <li>✓ Good physical health - able to maintain routines</li>
+                                <li>✓ Predictable patterns make anomalies easier to detect</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">💡 Clinical Context</div>
+                        <div class="insight-detail-content">
+                            Occupational therapists assess "routine establishment" as a sign of executive function. Sudden drops in consistency (<70%) may signal depression, illness, or cognitive decline.
+                        </div>
+                    </div>
+                    <div class="insight-action-btns">
+                        <button class="insight-action-btn">View Routine Details</button>
+                        <button class="insight-action-btn">Share with Family</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card" onclick="toggleInsight(this)">
+                <div class="insight-expand-btn">+</div>
+                <div class="insight-icon">🎯</div>
+                <div class="insight-title">Strong Presence-Motion Correlation</div>
+                <div class="insight-description">
+                    mmWave presence detection correlates 0.87 with traditional motion sensors, indicating accurate stationary presence tracking. Detects 23% more occupancy time than motion alone.
+                </div>
+                <div class="insight-expanded-content">
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">🔬 How Correlation Works</div>
+                        <div class="insight-detail-content">
+                            Think of two friends counting cars on a highway. If they both count 87 cars, correlation is 1.0 (perfect). Your sensors show 0.87 correlation = strong agreement, validating both systems.
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">📊 Why Two Sensor Types</div>
+                        <div class="insight-detail-content">
+                            <strong>Motion sensors (PIR):</strong> Count movements but miss stillness<br>
+                            <strong>mmWave radar:</strong> Detects presence even when sitting still<br>
+                            <strong>Together:</strong> Complete activity picture - motion + rest
+                        </div>
+                    </div>
+                    <div class="insight-action-btns">
+                        <button class="insight-action-btn">Learn About Sensors</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card warning" onclick="toggleInsight(this)">
+                <div class="insight-expand-btn">+</div>
+                <div class="insight-icon">⚠️</div>
+                <div class="insight-title">Extended Stillness Detected</div>
+                <div class="insight-description">
+                    3 instances of 90+ minute stillness periods detected in Living Room (2:00-3:30 PM pattern). Consider checking if intentional rest or monitoring concern.
+                </div>
+                <div class="insight-expanded-content">
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">📋 What Stillness Can Mean</div>
+                        <div class="insight-detail-content">
+                            <strong>✓ Normal:</strong> Reading, watching TV, napping, meditation<br>
+                            <strong>⚠️ Review:</strong> Depression, medication side effects, fatigue<br>
+                            <strong>🚨 Concern:</strong> Fall, medical emergency, unresponsiveness
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">🎯 Recommended Actions</div>
+                        <div class="insight-detail-content">
+                            <ol style="margin-left: 20px;">
+                                <li>Check if this is routine afternoon rest/TV time</li>
+                                <li>If new pattern, make quick phone call to check in</li>
+                                <li>If no response to calls, consider in-person visit</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">🔍 Context for This Alert</div>
+                        <div class="insight-detail-content">
+                            Same 2:00-3:30 PM window for 3 consecutive days suggests <strong>routine behavior</strong> (intentional afternoon rest). This is likely <span style="color: var(--success);">not a concern</span>, but worth confirming with a casual check-in.
+                        </div>
+                    </div>
+                    <div class="insight-action-btns">
+                        <button class="insight-action-btn">Set Check-In Reminder</button>
+                        <button class="insight-action-btn">Mark as Normal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card success" onclick="toggleInsight(this)">
+                <div class="insight-expand-btn">+</div>
+                <div class="insight-icon">🚿</div>
+                <div class="insight-title">Bathroom Independence Maintained</div>
+                <div class="insight-description">
+                    Bathroom presence duration averaging 8-12 minutes (normal range). Shower humidity events correlate 0.64 with bathroom motion, indicating independent bathing.
+                </div>
+                <div class="insight-expanded-content">
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">✅ What This Indicates</div>
+                        <div class="insight-detail-content">
+                            <strong>8-12 minute duration:</strong> Efficient toilet use without difficulty<br>
+                            <strong>0.64 correlation:</strong> Shower events match bathroom visits reliably<br>
+                            <strong>Conclusion:</strong> Independent with ADL (Activities of Daily Living)
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">🔔 What to Watch For</div>
+                        <div class="insight-detail-content">
+                            Monitor for changes like:
+                            <ul>
+                                <li>Duration >20 minutes (possible difficulty)</li>
+                                <li>Visits <3/day (possible dehydration)</li>
+                                <li>Nighttime visits >4/night (possible UTI)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card" onclick="toggleInsight(this)">
+                <div class="insight-expand-btn">+</div>
+                <div class="insight-icon">🌙</div>
+                <div class="insight-title">Nighttime Movement Pattern</div>
+                <div class="insight-description">
+                    Average 2.3 bedroom exits per night (12 AM - 6 AM), primarily for bathroom visits. Duration 4-6 minutes typical, no prolonged nighttime activity detected.
+                </div>
+                <div class="insight-expanded-content">
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">😴 Sleep Quality Impact</div>
+                        <div class="insight-detail-content">
+                            <strong>2-3 nighttime wakes:</strong> Normal for adults 65+<br>
+                            <strong>4-6 min duration:</strong> Quick bathroom visit, returns to bed<br>
+                            <strong>Sleep fragmentation:</strong> Minimal - good sleep quality maintained
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">⚠️ When to Review</div>
+                        <div class="insight-detail-content">
+                            Consider evaluation if:
+                            <ul>
+                                <li>Visits increase to >4 per night (UTI, medication)</li>
+                                <li>Duration >15 minutes (confusion, falls)</li>
+                                <li>Frequency suddenly changes (new health issue)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card" onclick="toggleInsight(this)">
+                <div class="insight-expand-btn">+</div>
+                <div class="insight-icon">📈</div>
+                <div class="insight-title">Activity Level Trending Up</div>
+                <div class="insight-description">
+                    Total daily events increased 8% this week. Kitchen activity up 12%, suggesting increased meal preparation. Positive independence indicator.
+                </div>
+                <div class="insight-expanded-content">
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">🎉 Why This Is Good News</div>
+                        <div class="insight-detail-content">
+                            Increased activity often indicates:
+                            <ul>
+                                <li>✓ Improved energy levels</li>
+                                <li>✓ Better mood/less depression</li>
+                                <li>✓ More engagement in daily tasks</li>
+                                <li>✓ Possible social visits or activities</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="insight-detail-section">
+                        <div class="insight-detail-title">📊 Kitchen Activity Detail</div>
+                        <div class="insight-detail-content">
+                            12% increase in kitchen time suggests:
+                            <ul>
+                                <li>More home-cooked meals (vs. delivery)</li>
+                                <li>Meal preparation for guests</li>
+                                <li>Snacking/hydration throughout day</li>
+                            </ul>
+                            All positive signs of independence and self-care.
+                        </div>
+                    </div>
+                    <div class="insight-action-btns">
+                        <button class="insight-action-btn">View Kitchen Trends</button>
+                        <button class="insight-action-btn">Celebrate This Win!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BEDROOM OCCUPANCY TIMELINE -->
+        <div class="section-header" style="margin-top: 40px;">
+            <h2 class="section-title">
+                <span class="section-icon">🛏️</span>
+                Bedroom Occupancy Timeline
+            </h2>
+            <p class="section-subtitle">Sleep quality analysis from combined presence + motion data</p>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">7-Night Sleep Pattern Analysis</div>
+                    <div class="chart-subtitle">Purple = Presence in Bed | Orange spikes = Motion/Restlessness</div>
+                </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+                <canvas id="bedroomTimelineChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOLTIP SYSTEM STYLES -->
+    <style>
+        /* INFO BUTTON */
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #3b82f6;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        .info-btn:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* MOBILE: Larger touch targets */
+        @media (max-width: 768px) {
+            .info-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+                animation: pulse-info 3s infinite;
+            }
+            
+            @keyframes pulse-info {
+                0%, 100% { 
+                    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                }
+                50% { 
+                    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+                }
+            }
+        }
+        
+        /* HOVER TOOLTIP */
+        .hover-tooltip {
+            position: absolute;
+            background: #1e293b;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            border-radius: 8px;
+            padding: 12px 16px;
+            max-width: 280px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #e5e7eb;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .hover-tooltip.visible {
+            opacity: 1;
+        }
+        
+        .hover-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 20px;
+            width: 12px;
+            height: 12px;
+            background: #1e293b;
+            border-left: 1px solid rgba(59, 130, 246, 0.5);
+            border-top: 1px solid rgba(59, 130, 246, 0.5);
+            transform: rotate(45deg);
+        }
+        
+        /* INFO PANEL (SLIDE-IN) */
+        .info-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .info-panel-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .info-panel {
+            position: fixed;
+            right: -500px;
+            top: 0;
+            width: 480px;
+            height: 100vh;
+            background: #1e293b;
+            border-left: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            overflow-y: auto;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .info-panel.open {
+            right: 0;
+        }
+        
+        /* TABLET: 2/3 width panel */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .info-panel {
+                width: 66%;
+                max-width: 500px;
+                right: -70%;
+            }
+        }
+        
+        /* MOBILE: Full-screen panel */
+        @media (max-width: 768px) {
+            .info-panel {
+                width: 100%;
+                right: -100%;
+                left: 0;
+                border-left: none;
+            }
+            
+            .info-panel.open {
+                right: 0;
+            }
+            
+            /* Prevent body scroll when panel open */
+            body.panel-open {
+                overflow: hidden;
+            }
+        }
+        
+        .info-panel-header {
+            position: sticky;
+            top: 0;
+            background: #0f172a;
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        /* MOBILE: Better spacing and back arrow */
+        @media (max-width: 768px) {
+            .info-panel-header {
+                padding: 16px 20px;
+            }
+            
+            .info-panel-close::before {
+                content: '← ';
+                font-size: 1.2rem;
+            }
+        }
+        
+        .info-panel-title {
+            font-size: 1.3rem;
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .info-panel-close {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .info-panel-close:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
+        .info-panel-content {
+            padding: 24px;
+        }
+        
+        .info-section {
+            margin-bottom: 28px;
+        }
+        
+        .info-section-title {
+            font-size: 1.1rem;
+            color: #3b82f6;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-section-content {
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        
+        .info-section-content ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+        
+        .info-section-content li {
+            margin-bottom: 8px;
+        }
+        
+        .info-highlight {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin: 16px 0;
+        }
+        
+        .info-metric-box {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: monospace;
+            margin: 0 4px;
+        }
+        
+        /* EXPANDABLE INSIGHT CARDS */
+        .insight-card {
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .insight-expand-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e5e7eb;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .insight-expand-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        /* MOBILE: Explicit tap button to prevent scroll-jacking */
+        @media (max-width: 768px) {
+            .insight-card {
+                cursor: default;
+                pointer-events: none; /* Disable whole-card tap */
+            }
+            
+            .insight-expand-btn {
+                display: none; /* Hide floating + button */
+            }
+            
+            /* Add explicit "More Details" button at bottom */
+            .insight-card::after {
+                content: '+ More Details';
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                padding: 14px;
+                margin-top: 16px;
+                background: rgba(59, 130, 246, 0.15);
+                border: 1px solid rgba(59, 130, 246, 0.4);
+                border-radius: 8px;
+                color: #3b82f6;
+                font-weight: 600;
+                font-size: 0.95rem;
+                pointer-events: all; /* Re-enable just for button */
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .insight-card.expanded::after {
+                content: '− Less Details';
+                background: rgba(239, 68, 68, 0.15);
+                border-color: rgba(239, 68, 68, 0.4);
+                color: #ef4444;
+            }
+            
+            .insight-card::after:active {
+                background: rgba(59, 130, 246, 0.25);
+            }
+        }
+        
+        .insight-expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
+        }
+        
+        .insight-card.expanded .insight-expanded-content {
+            max-height: 500px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .insight-detail-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .insight-detail-title {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .insight-detail-content {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .insight-action-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .insight-action-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e5e7eb;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .insight-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+        }
+        
+        /* FIRST-TIME TOUR */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            display: none;
+        }
+        
+        .tour-overlay.active {
+            display: block;
+        }
+        
+        .tour-spotlight {
+            position: absolute;
+            border: 3px solid #3b82f6;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 24px #3b82f6;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+        
+        .tour-tooltip {
+            position: absolute;
+            background: #1e293b;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        }
+        
+        .tour-tooltip-title {
+            font-size: 1.3rem;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .tour-tooltip-content {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        
+        .tour-tooltip-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tour-progress {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+        
+        .tour-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tour-btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .tour-btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .tour-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tour-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* WELCOME MODAL */
+        .welcome-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            z-index: 10001;
+            display: none;
+        }
+        
+        .welcome-modal.active {
+            display: block;
+        }
+        
+        .welcome-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-title {
+            font-size: 1.75rem;
+            color: #f1f5f9;
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .welcome-content {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        
+        .welcome-icons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .welcome-icon-item {
+            text-align: center;
+        }
+        
+        .welcome-icon-symbol {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .welcome-icon-text {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+        
+        .welcome-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .welcome-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .info-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+
+    <script>
+        // Chart.js default configuration for dark theme
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+        // Generate stillness heatmap
+        function generateStillnessHeatmap() {
+            const container = document.getElementById('stillnessHeatmap');
+            const hours = 24;
+            
+            for (let i = 0; i < hours; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                
+                // Simulate stillness intensity (0-5)
+                let intensity;
+                if (i >= 0 && i <= 6) {
+                    // Night hours - high stillness
+                    intensity = 5;
+                } else if (i >= 14 && i <= 16) {
+                    // Afternoon - medium stillness
+                    intensity = 3;
+                } else if (i >= 7 && i <= 12) {
+                    // Morning - low stillness
+                    intensity = 1;
+                } else {
+                    // Evening - medium stillness
+                    intensity = 2;
+                }
+                
+                cell.classList.add(`intensity-${intensity}`);
+                cell.title = `${i}:00 - Avg stillness: ${intensity * 20} min`;
+                
+                container.appendChild(cell);
+            }
+        }
+
+        // Presence vs Motion Correlation Chart
+        function createCorrelationChart() {
+            const ctx = document.getElementById('correlationChart');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['12 AM', '3 AM', '6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM', '11 PM'],
+                    datasets: [
+                        {
+                            label: 'Presence Duration (min)',
+                            data: [45, 48, 52, 35, 28, 42, 38, 35, 40],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Motion Events',
+                            data: [2, 3, 5, 42, 38, 35, 48, 45, 12],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Presence (min)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Motion Events'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Room Distribution Chart
+        function createRoomDistributionChart() {
+            const ctx = document.getElementById('roomDistributionChart');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Hallway'],
+                    datasets: [{
+                        data: [25, 48, 17, 7, 3],
+                        backgroundColor: [
+                            '#667eea',
+                            '#8b5cf6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#3b82f6'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Activity Intensity Chart
+        function createIntensityChart() {
+            const ctx = document.getElementById('intensityChart');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['12 AM', '3 AM', '6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM', '11 PM'],
+                    datasets: [{
+                        label: 'Events per Hour',
+                        data: [5, 8, 42, 58, 52, 48, 65, 55, 28],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Events'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Bedroom Timeline Chart
+        function createBedroomTimelineChart() {
+            const ctx = document.getElementById('bedroomTimelineChart');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['10 PM', '11 PM', '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM'],
+                    datasets: [
+                        {
+                            label: 'In Bed (Presence)',
+                            data: [1, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            stepped: true,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Motion/Restlessness',
+                            data: [3, 1, 0, 2, 8, 1, 0, 1, 2, 5],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            type: 'bar',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'In Bed (1=Yes, 0=No)'
+                            },
+                            min: 0,
+                            max: 1.2
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Motion Events'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Room selection
+        function selectRoom(roomId) {
+            // Remove active class from all cards
+            document.querySelectorAll('.room-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active to selected
+            event.target.closest('.room-card').classList.add('active');
+            
+            console.log('Selected room:', roomId);
+            // In production, this would update charts with room-specific data
+        }
+
+        // Initialize all charts
+        generateStillnessHeatmap();
+        createCorrelationChart();
+        createRoomDistributionChart();
+        createIntensityChart();
+        createBedroomTimelineChart();
+
+        // Auto-refresh simulation
+        setInterval(() => {
+            console.log('Dashboard updated:', new Date().toLocaleTimeString());
+        }, 30000);
+        
+        // ============================================
+        // TOOLTIP SYSTEM
+        // ============================================
+        
+        class TooltipSystem {
+            constructor() {
+                this.hoverTooltip = null;
+                this.currentPanel = null;
+                this.hoverTimeout = null;
+                this.init();
+            }
+            
+            init() {
+                this.createTooltipElements();
+                this.attachHoverListeners();
+                this.checkFirstVisit();
+            }
+            
+            createTooltipElements() {
+                // Hover tooltip
+                this.hoverTooltip = document.createElement('div');
+                this.hoverTooltip.className = 'hover-tooltip';
+                document.body.appendChild(this.hoverTooltip);
+                
+                // Info panel overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'info-panel-overlay';
+                overlay.onclick = () => this.closeInfoPanel();
+                document.body.appendChild(overlay);
+                
+                // Info panel
+                const panel = document.createElement('div');
+                panel.className = 'info-panel';
+                panel.id = 'info-panel';
+                document.body.appendChild(panel);
+            }
+            
+            attachHoverListeners() {
+                document.querySelectorAll('[data-hover-tip]').forEach(el => {
+                    el.addEventListener('mouseenter', (e) => {
+                        clearTimeout(this.hoverTimeout);
+                        this.hoverTimeout = setTimeout(() => {
+                            this.showHoverTooltip(e.target, e.target.dataset.hoverTip);
+                        }, 300);
+                    });
+                    
+                    el.addEventListener('mouseleave', () => {
+                        clearTimeout(this.hoverTimeout);
+                        this.hideHoverTooltip();
+                    });
+                });
+            }
+            
+            showHoverTooltip(element, text) {
+                const rect = element.getBoundingClientRect();
+                this.hoverTooltip.textContent = text;
+                this.hoverTooltip.style.left = rect.left + 'px';
+                this.hoverTooltip.style.top = (rect.bottom + 10) + 'px';
+                this.hoverTooltip.classList.add('visible');
+            }
+            
+            hideHoverTooltip() {
+                this.hoverTooltip.classList.remove('visible');
+            }
+            
+            checkFirstVisit() {
+                if (!localStorage.getItem('tellaboomer-visited')) {
+                    setTimeout(() => {
+                        this.showWelcomeModal();
+                    }, 1000);
+                }
+            }
+            
+            showWelcomeModal() {
+                const modal = document.createElement('div');
+                modal.className = 'welcome-modal active';
+                modal.innerHTML = `
+                    <div class="welcome-icon">👋</div>
+                    <div class="welcome-title">Welcome to TellaBoomer!</div>
+                    <div class="welcome-content">
+                        This dashboard shows wellness patterns from smart home sensors. 
+                        We've added help tips throughout to guide you.
+                        <div class="welcome-icons">
+                            <div class="welcome-icon-item">
+                                <div class="welcome-icon-symbol">ⓘ</div>
+                                <div class="welcome-icon-text">Click for detailed explanations</div>
+                            </div>
+                            <div class="welcome-icon-item">
+                                <div class="welcome-icon-symbol">💡</div>
+                                <div class="welcome-icon-text">Tips to understand patterns</div>
+                            </div>
+                            <div class="welcome-icon-item">
+                                <div class="welcome-icon-symbol">+</div>
+                                <div class="welcome-icon-text">Expand insights for more</div>
+                            </div>
+                        </div>
+                        Want a quick tour?
+                    </div>
+                    <div class="welcome-actions">
+                        <button class="welcome-btn tour-btn-secondary" onclick="tooltipSystem.dismissWelcome()">
+                            I'll explore myself
+                        </button>
+                        <button class="welcome-btn tour-btn-primary" onclick="tooltipSystem.startTour()">
+                            Yes, show me around
+                        </button>
+                    </div>
+                `;
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'info-panel-overlay open';
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+                
+                this.welcomeModal = modal;
+                this.welcomeOverlay = overlay;
+            }
+            
+            dismissWelcome() {
+                localStorage.setItem('tellaboomer-visited', 'true');
+                if (this.welcomeModal) this.welcomeModal.remove();
+                if (this.welcomeOverlay) this.welcomeOverlay.remove();
+            }
+            
+            startTour() {
+                this.dismissWelcome();
+                this.showTourStep(0);
+            }
+            
+            showTourStep(step) {
+                const steps = [
+                    {
+                        target: '.metrics-grid',
+                        title: '📊 Key Metrics',
+                        content: 'These cards show important daily metrics. Green arrows ↑ mean improvement, red ↓ may need attention, and gray → means stable. Hover over the ⓘ icons for quick explanations.',
+                        position: { top: '180px', left: '50%', transform: 'translateX(-50%)' }
+                    },
+                    {
+                        target: '.chart-container',
+                        title: '📈 Activity Charts',
+                        content: 'Charts show patterns over time. The blue line is mmWave presence (detects even when sitting still), and green is motion events (counts movements). Together they give a complete picture.',
+                        position: { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+                    },
+                    {
+                        target: '.insights-grid',
+                        title: '🤖 AI Insights',
+                        content: 'These cards show patterns our AI detected. Click the + button to expand any insight for detailed explanations, clinical context, and recommended actions.',
+                        position: { bottom: '100px', left: '50%', transform: 'translateX(-50%)' }
+                    }
+                ];
+                
+                if (step >= steps.length) {
+                    this.endTour();
+                    return;
+                }
+                
+                const tourStep = steps[step];
+                const target = document.querySelector(tourStep.target);
+                
+                if (!target) {
+                    this.endTour();
+                    return;
+                }
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'tour-overlay active';
+                
+                const rect = target.getBoundingClientRect();
+                const spotlight = document.createElement('div');
+                spotlight.className = 'tour-spotlight';
+                spotlight.style.top = (rect.top - 10) + 'px';
+                spotlight.style.left = (rect.left - 10) + 'px';
+                spotlight.style.width = (rect.width + 20) + 'px';
+                spotlight.style.height = (rect.height + 20) + 'px';
+                
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tour-tooltip';
+                Object.assign(tooltip.style, tourStep.position);
+                tooltip.innerHTML = `
+                    <div class="tour-tooltip-title">${tourStep.title}</div>
+                    <div class="tour-tooltip-content">${tourStep.content}</div>
+                    <div class="tour-tooltip-nav">
+                        <div class="tour-progress">Step ${step + 1} of ${steps.length}</div>
+                        <div>
+                            ${step > 0 ? '<button class="tour-btn tour-btn-secondary" onclick="tooltipSystem.endTour()">Skip</button>' : ''}
+                            <button class="tour-btn tour-btn-primary" onclick="tooltipSystem.showTourStep(${step + 1})" style="margin-left: 8px;">
+                                ${step === steps.length - 1 ? 'Finish' : 'Next'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                overlay.appendChild(spotlight);
+                overlay.appendChild(tooltip);
+                document.body.appendChild(overlay);
+                
+                this.currentTourOverlay = overlay;
+                
+                // Scroll to target
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            endTour() {
+                if (this.currentTourOverlay) {
+                    this.currentTourOverlay.remove();
+                    this.currentTourOverlay = null;
+                }
+                localStorage.setItem('tellaboomer-visited', 'true');
+            }
+        }
+        
+        // Info Panel Content Database
+        const infoPanelContent = {
+            'total-events': {
+                title: '👣 Total Events - Detailed Explanation',
+                sections: [
+                    {
+                        title: '🔧 How It Works',
+                        content: `Motion sensors use passive infrared (PIR) detection - think of them as "trip wires" that count each time someone crosses their field of view. No cameras, no recording, just counts.<br><br>Each sensor covers an area of about 15-20 feet and detects heat changes from movement.`
+                    },
+                    {
+                        title: '📊 Why It Matters',
+                        content: `<ul>
+                            <li><strong>Sudden drops (>30%)</strong> may indicate illness, injury, or depression</li>
+                            <li><strong>Gradual increases</strong> show improving mobility and engagement</li>
+                            <li><strong>Stable patterns</strong> indicate predictable, healthy routines</li>
+                        </ul>`
+                    },
+                    {
+                        title: '🏥 Clinical Context',
+                        content: `Occupational therapists use this to track "functional mobility" - your ability to move around your home independently. Research shows <span class="info-metric-box">&lt;200 events/day</span> correlates with higher fall risk and may indicate need for intervention.`
+                    },
+                    {
+                        title: '✅ What To Do If It Changes',
+                        content: `<div class="info-highlight">
+                            <strong>Sudden drop:</strong> Contact OT or physician for assessment<br>
+                            <strong>Gradual increase:</strong> Great! Document it and celebrate<br>
+                            <strong>Stable:</strong> Continue current activities and monitoring
+                        </div>`
+                    }
+                ]
+            },
+            'active-time': {
+                title: '⏱️ Active Time - Detailed Explanation',
+                sections: [
+                    {
+                        title: '🔧 How It Works',
+                        content: `Active time combines data from both motion sensors (counting movements) and mmWave presence sensors (detecting occupancy). This gives total time with either movement OR presence detected.`
+                    },
+                    {
+                        title: '📊 Normal Ranges',
+                        content: `<ul>
+                            <li><strong>12-16 hours/day:</strong> Typical for healthy seniors</li>
+                            <li><strong>10-12 hours/day:</strong> May indicate fatigue or sedentary lifestyle</li>
+                            <li><strong>&lt;10 hours/day:</strong> Review recommended - possible health concern</li>
+                        </ul>`
+                    },
+                    {
+                        title: '💡 Context Matters',
+                        content: `Active time includes:<br>
+                        • Walking around the house<br>
+                        • Cooking, cleaning, personal care<br>
+                        • Sitting activities (reading, TV) in common areas<br>
+                        • Does NOT include: Sleep time in bedroom`
+                    }
+                ]
+            },
+            'stillness-time': {
+                title: '🛋️ Stillness Time - Detailed Explanation',
+                sections: [
+                    {
+                        title: '🔧 How mmWave Detects Stillness',
+                        content: `mmWave radar (like submarine sonar) continuously measures distance to objects using radio waves. When presence is detected but NO motion for extended periods, that's "stillness."<br><br>Think: Sitting reading a book - you're there, but not moving enough to trigger motion sensors.`
+                    },
+                    {
+                        title: '✅ Normal Stillness',
+                        content: `<ul>
+                            <li>Reading books or newspapers (30-90 min)</li>
+                            <li>Watching TV (60-120 min)</li>
+                            <li>Afternoon naps (30-90 min)</li>
+                            <li>Meditation or prayer (15-45 min)</li>
+                        </ul>`
+                    },
+                    {
+                        title: '⚠️ Concerning Stillness',
+                        content: `<div class="info-highlight" style="border-color: #f59e0b;">
+                            <strong>Watch for:</strong><br>
+                            • NEW patterns of extended stillness (>2 hours)<br>
+                            • Increasing stillness over several weeks<br>
+                            • Stillness in unusual locations (bathroom, hallway)<br>
+                            • Combined with other declining metrics<br><br>
+                            These MAY indicate depression, medication side effects, or mobility issues requiring evaluation.
+                        </div>`
+                    }
+                ]
+            },
+            'presence-sessions': {
+                title: '🎯 Presence Sessions - Detailed Explanation',
+                sections: [
+                    {
+                        title: '📖 What Is a Session',
+                        content: `A "session" is a continuous period of presence in a room. When you enter a room, a session starts. When you leave and don't return for 5+ minutes, that session ends.<br><br><strong>Example:</strong> Enter kitchen at 8:00 AM, leave at 8:15 AM = 1 session of 15 minutes.`
+                    },
+                    {
+                        title: '🔢 Typical Ranges',
+                        content: `<ul>
+                            <li><strong>40-60 sessions/day:</strong> Normal activity level</li>
+                            <li><strong>60-80 sessions/day:</strong> High activity (great!)</li>
+                            <li><strong>&lt;30 sessions/day:</strong> Low activity - may need review</li>
+                        </ul>`
+                    },
+                    {
+                        title: '💡 What Sessions Tell Us',
+                        content: `More sessions usually mean:<br>
+                        • More room-to-room movement<br>
+                        • More varied activities throughout the day<br>
+                        • Higher engagement with home environment<br>
+                        • Better overall function and independence`
+                    }
+                ]
+            },
+            'room-transitions': {
+                title: '🏠 Room Transitions - Detailed Explanation',
+                sections: [
+                    {
+                        title: '🚪 What We Count',
+                        content: `A transition = moving from one room to another. We track this using motion sensors placed at doorways and room boundaries.<br><br><strong>Example:</strong> Kitchen → Hallway → Bathroom = 2 transitions`
+                    },
+                    {
+                        title: '📊 Clinical Significance',
+                        content: `<strong>Why OTs care:</strong><br>
+                        Transitions require:<br>
+                        • Balance and coordination<br>
+                        • Spatial awareness<br>
+                        • Physical stamina<br>
+                        • Cognitive planning<br><br>
+                        Declining transitions may indicate mobility limitations or cognitive issues affecting navigation.`
+                    },
+                    {
+                        title: '✅ Healthy Ranges',
+                        content: `<span class="info-metric-box">120-180 transitions/day</span> is typical for active adults living independently. Lower numbers aren't always bad - some people simply have more sedentary, focused activities.`
+                    }
+                ]
+            },
+            'session-length': {
+                title: '💤 Average Session Length - Detailed Explanation',
+                sections: [
+                    {
+                        title: '⏱️ What This Measures',
+                        content: `Average time spent in a room per visit. Calculated by dividing total presence time by number of sessions.<br><br><strong>Example:</strong><br>Living Room: 4 hours total ÷ 10 sessions = 24 minutes average`
+                    },
+                    {
+                        title: '🎯 What It Indicates',
+                        content: `<strong>Longer sessions (>25 min):</strong><br>
+                        • More engaged activities (reading, hobbies)<br>
+                        • Comfortable, purposeful room use<br>
+                        • Good attention span<br><br>
+                        <strong>Shorter sessions (&lt;15 min):</strong><br>
+                        • Quick in-and-out visits<br>
+                        • Possibly restless or searching behavior<br>
+                        • May indicate boredom or confusion`
+                    },
+                    {
+                        title: '🏠 Room-Specific Norms',
+                        content: `Different rooms have different typical lengths:<br>
+                        • <strong>Bedroom:</strong> 6-9 hours (sleep)<br>
+                        • <strong>Living Room:</strong> 20-40 minutes per visit<br>
+                        • <strong>Kitchen:</strong> 15-30 minutes (meal prep)<br>
+                        • <strong>Bathroom:</strong> 5-12 minutes per visit`
+                    }
+                ]
+            },
+            'correlation-chart': {
+                title: '📊 Presence vs Motion Correlation',
+                sections: [
+                    {
+                        title: '📖 How to Read This Chart',
+                        content: `<strong style="color: #3b82f6;">BLUE LINE (Presence Duration):</strong><br>
+                        mmWave radar sensors detect when you're in a room - even sitting still. Measured in minutes per hour. Think: "submarine sonar."<br><br>
+                        <strong style="color: #10b981;">GREEN LINE (Motion Events):</strong><br>
+                        Traditional motion sensors that count movements. Think: "trip wires" counting each crossing.`
+                    },
+                    {
+                        title: '🎯 Why Two Lines',
+                        content: `Motion alone misses 23% of time you're home because it doesn't detect stillness (reading, watching TV, resting).<br><br>
+                        mmWave presence fills this gap by detecting stationary occupancy.<br><br>
+                        Together, they show a <strong>COMPLETE activity picture</strong>.`
+                    },
+                    {
+                        title: '📈 What Patterns Mean',
+                        content: `<ul>
+                            <li><strong>Both high:</strong> Active period (cooking, moving around)</li>
+                            <li><strong>Blue high, green low:</strong> Resting (reading, TV, sitting)</li>
+                            <li><strong>Both low:</strong> Not in room or sleeping</li>
+                            <li><strong>Green high, blue low:</strong> Unusual - may indicate sensor issue</li>
+                        </ul>`
+                    }
+                ]
+            }
+        };
+        
+        // Open info panel
+        function openInfoPanel(contentId) {
+            const content = infoPanelContent[contentId];
+            if (!content) return;
+            
+            const panel = document.getElementById('info-panel');
+            const overlay = document.querySelector('.info-panel-overlay');
+            
+            let sectionsHTML = '';
+            content.sections.forEach(section => {
+                sectionsHTML += `
+                    <div class="info-section">
+                        <div class="info-section-title">${section.title}</div>
+                        <div class="info-section-content">${section.content}</div>
+                    </div>
+                `;
+            });
+            
+            panel.innerHTML = `
+                <div class="info-panel-header">
+                    <div class="info-panel-title">${content.title}</div>
+                    <button class="info-panel-close" onclick="closeInfoPanel()">✕ Close</button>
+                </div>
+                <div class="info-panel-content">
+                    ${sectionsHTML}
+                </div>
+            `;
+            
+            panel.classList.add('open');
+            overlay.classList.add('open');
+            
+            // Prevent body scroll on mobile when panel open
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('panel-open');
+            }
+        }
+        
+        // Close info panel
+        function closeInfoPanel() {
+            const panel = document.getElementById('info-panel');
+            const overlay = document.querySelector('.info-panel-overlay');
+            panel.classList.remove('open');
+            overlay.classList.remove('open');
+            
+            // Re-enable body scroll
+            document.body.classList.remove('panel-open');
+        }
+        
+        // Toggle insight expansion
+        function toggleInsight(card) {
+            const isExpanded = card.classList.contains('expanded');
+            
+            // Close all other insights
+            document.querySelectorAll('.insight-card').forEach(c => {
+                c.classList.remove('expanded');
+                const btn = c.querySelector('.insight-expand-btn');
+                if (btn) btn.textContent = '+';
+            });
+            
+            // Toggle this one
+            if (!isExpanded) {
+                card.classList.add('expanded');
+                const btn = card.querySelector('.insight-expand-btn');
+                if (btn) btn.textContent = '−';
+            }
+        }
+        
+        // Initialize tooltip system
+        let tooltipSystem;
+        window.addEventListener('DOMContentLoaded', () => {
+            tooltipSystem = new TooltipSystem();
+        });
+        
+        // Dashboard menu toggle
+        function toggleDashboardMenu() {
+            const menu = document.getElementById('dashboardMenu');
+            menu.classList.toggle('open');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('dashboardMenu');
+            const button = document.querySelector('.nav-select');
+            if (menu && !menu.contains(e.target) && !button.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TellaBoomer OT Narrative Dashboard v2.5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            padding-top: 80px;
+        }
+        
+        /* NAVIGATION HEADER */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(118, 75, 162, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+        
+        .nav-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .nav-select-wrapper {
+            position: relative;
+        }
+        
+        .nav-select {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-select:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(30, 41, 59, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            min-width: 280px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 1002;
+        }
+        
+        .nav-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .nav-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .nav-dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+        }
+        
+        .nav-dropdown-item.active {
+            background: rgba(102, 126, 234, 0.3);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 32px 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        
+        .narrative-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .narrative-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .narrative-content {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--gray-700);
+        }
+        
+        .narrative-content p {
+            margin-bottom: 16px;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .observation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 32px 0;
+        }
+        
+        .observation-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 3px solid var(--success);
+        }
+        
+        .observation-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        
+        .observation-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+        
+        .observation-text {
+            color: var(--gray-600);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #3b82f6;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+        
+        .info-btn:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* TOOLTIP SYSTEM */
+        .hover-tooltip {
+            position: absolute;
+            background: #1e293b;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            border-radius: 8px;
+            padding: 12px 16px;
+            max-width: 280px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #e5e7eb;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .hover-tooltip.visible {
+            opacity: 1;
+        }
+        
+        .info-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .info-panel-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .info-panel {
+            position: fixed;
+            right: -500px;
+            top: 0;
+            width: 480px;
+            height: 100vh;
+            background: white;
+            border-left: 1px solid #e5e7eb;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            overflow-y: auto;
+            transition: right 0.3s;
+        }
+        
+        .info-panel.open {
+            right: 0;
+        }
+        
+        .info-panel-header {
+            position: sticky;
+            top: 0;
+            background: #f9fafb;
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .info-panel-title {
+            font-size: 1.3rem;
+            color: var(--gray-900);
+            font-weight: 600;
+        }
+        
+        .info-panel-close {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .info-panel-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .info-panel-content {
+            padding: 24px;
+        }
+        
+        .info-section {
+            margin-bottom: 28px;
+        }
+        
+        .info-section-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .info-section-content {
+            color: var(--gray-700);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        
+        .observation-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 3px solid var(--success);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .observation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .observation-expand-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 24px;
+            height: 24px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .observation-expanded-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
+        }
+        
+        .observation-card.expanded .observation-expanded-content {
+            max-height: 300px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            .info-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+                animation: pulse-info 3s infinite;
+            }
+            
+            @keyframes pulse-info {
+                0%, 100% { 
+                    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                }
+                50% { 
+                    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+                }
+            }
+            
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .narrative-card {
+                padding: 24px 20px;
+            }
+            
+            .observation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .info-panel-header {
+                padding: 16px 20px;
+            }
+            
+            .info-panel-close::before {
+                content: '← ';
+            }
+            
+            body.panel-open {
+                overflow: hidden;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            * {
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION HEADER -->
+    <div class="nav-header">
+        <button class="nav-back" onclick="window.location.href='TellaBoomer_Gallery_v2.5.html'">
+            ← Back to Gallery
+        </button>
+        <div class="nav-title">OT Narrative Dashboard</div>
+        <div class="nav-select-wrapper">
+            <button class="nav-select" onclick="toggleDashboardMenu()">
+                Switch Dashboard ▼
+            </button>
+            <div class="nav-dropdown" id="dashboardMenu">
+                <a href="TellaBoomer_Family_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
+                    <span>Family Caregiver</span>
+                </a>
+                <a href="TellaBoomer_Clinical_Assessment_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">👨‍⚕️</span>
+                    <span>Clinical Assessment</span>
+                </a>
+                <a href="TellaBoomer_Movement_Patterns_Dashboard_v2.5.html" class="nav-dropdown-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Movement Patterns</span>
+                </a>
+                <a href="TellaBoomer_OT_Narrative_Dashboard_v2.5.html" class="nav-dropdown-item active">
+                    <span class="nav-icon">📖</span>
+                    <span>OT Narrative</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>📖 OT Narrative Dashboard</h1>
+        <p>Clinical storytelling with dignity and warmth</p>
+    </div>
+    
+    <div class="container">
+        <div class="narrative-card">
+            <h2 class="narrative-title">
+                <span>🏡</span>
+                This Week's Wellness Story
+                <button class="info-btn">ⓘ</button>
+            </h2>
+            <div class="narrative-content">
+                <p>Jane continues to demonstrate <span class="highlight">excellent independence</span> in her daily routines this week. Her morning routine shows remarkable consistency - she's up by 7:15 AM most days, moving purposefully through her breakfast preparation and personal care activities.</p>
+                
+                <p>What stands out this week is the <span class="highlight">12% increase in kitchen activity</span>, suggesting Jane is preparing more meals at home. Sensor data shows she's spending an average of 25 minutes in the kitchen during meal times, which aligns with cooking from scratch rather than reheating prepared meals. This is a positive indicator of both physical capability and cognitive engagement.</p>
+                
+                <p>Her sleep pattern remains <span class="highlight">stable and restorative</span> - averaging 8 hours per night with only 2-3 brief bathroom visits. The low restlessness score (12%) indicates quality sleep, which supports her daytime energy and function.</p>
+                
+                <p>The shower adherence data tells a story of maintained self-care: <span class="highlight">6 out of 7 days</span> this week. The one missed day was Tuesday when she had an early medical appointment, demonstrating good planning and prioritization rather than neglect.</p>
+            </div>
+            
+            <div class="action-bar">
+                <button class="btn btn-primary">📄 Generate Full Report</button>
+                <button class="btn btn-secondary">✉️ Email to Family</button>
+                <button class="btn btn-secondary">📋 Copy Narrative</button>
+                <button class="btn btn-secondary">⚙️ Adjust Tone</button>
+            </div>
+        </div>
+        
+        <div class="narrative-card">
+            <h2 class="narrative-title">
+                <span>👁️</span>
+                Clinical Observations
+            </h2>
+            
+            <div class="observation-grid">
+                <div class="observation-card" onclick="toggleObservation(this)">
+                    <div class="observation-expand-btn">+</div>
+                    <div class="observation-icon">🍳</div>
+                    <div class="observation-title">
+                        Meal Preparation Independence
+                        <button class="info-btn" onclick="event.stopPropagation(); openInfoPanel('meal-prep');" data-hover-tip="How we measure independent meal preparation">ⓘ</button>
+                    </div>
+                    <div class="observation-text">
+                        Extended kitchen sessions (20-30 min) with multiple room transitions suggest multi-step meal prep. This requires planning, sequencing, and sustained attention - all positive cognitive indicators.
+                    </div>
+                    <div class="observation-expanded-content">
+                        <p style="margin-bottom: 8px;"><strong>Clinical Significance:</strong></p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">Meal preparation is an IADL (Instrumental Activity of Daily Living) that requires multiple cognitive domains: executive function for planning, working memory for recipes, and motor skills for execution. The 12% increase suggests improving engagement and capability.</p>
+                    </div>
+                </div>
+                
+                <div class="observation-card" onclick="toggleObservation(this)">
+                    <div class="observation-expand-btn">+</div>
+                    <div class="observation-icon">🚿</div>
+                    <div class="observation-title">
+                        Hygiene Routine Maintained
+                        <button class="info-btn" onclick="event.stopPropagation(); openInfoPanel('hygiene');" data-hover-tip="Shower detection using humidity and temperature sensors">ⓘ</button>
+                    </div>
+                    <div class="observation-text">
+                        86% shower adherence with 12-minute average duration indicates independent bathing without difficulty. Humidity patterns show morning preference (6/7 showers between 7-9 AM).
+                    </div>
+                    <div class="observation-expanded-content">
+                        <p style="margin-bottom: 8px;"><strong>Monitoring Method:</strong></p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">Humidity sensor detects 30%+ increase + temperature rises 8°F+ + motion in bathroom = shower event logged. No cameras or audio - only environmental sensors ensure complete privacy.</p>
+                    </div>
+                </div>
+                
+                <div class="observation-card" onclick="toggleObservation(this)">
+                    <div class="observation-expand-btn">+</div>
+                    <div class="observation-icon">😴</div>
+                    <div class="observation-title">
+                        Quality Sleep Pattern
+                        <button class="info-btn" onclick="event.stopPropagation(); openInfoPanel('sleep');" data-hover-tip="Sleep quality measured by duration and restlessness">ⓘ</button>
+                    </div>
+                    <div class="observation-text">
+                        8-hour sleep duration with minimal nighttime restlessness supports healthy circadian rhythm. 2-3 bathroom visits per night is age-appropriate and shows no concerning patterns.
+                    </div>
+                    <div class="observation-expanded-content">
+                        <p style="margin-bottom: 8px;"><strong>Sleep Metrics:</strong></p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">mmWave presence sensors detect in-bed time. Restlessness score calculated from motion frequency during sleep hours. Low score (12%) indicates quality sleep without excessive tossing/turning.</p>
+                    </div>
+                </div>
+                
+                <div class="observation-card" onclick="toggleObservation(this)">
+                    <div class="observation-expand-btn">+</div>
+                    <div class="observation-icon">🏃</div>
+                    <div class="observation-title">
+                        Functional Mobility
+                        <button class="info-btn" onclick="event.stopPropagation(); openInfoPanel('mobility');" data-hover-tip="Movement events tracked across all rooms">ⓘ</button>
+                    </div>
+                    <div class="observation-text">
+                        342 daily movement events indicate excellent home mobility. Room transitions are purposeful and efficient, with no extended stillness periods that would suggest difficulty navigating.
+                    </div>
+                    <div class="observation-expanded-content">
+                        <p style="margin-bottom: 8px;"><strong>Mobility Benchmarks:</strong></p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">Research shows <200 events/day correlates with increased fall risk. Jane's 342 events/day places her well above this threshold, indicating maintained strength and confidence in home navigation.</p>
+                    </div>
+                </div>
+                
+                <div class="observation-card" onclick="toggleObservation(this)">
+                    <div class="observation-expand-btn">+</div>
+                    <div class="observation-icon">🕐</div>
+                    <div class="observation-title">
+                        Consistent Routines
+                        <button class="info-btn" onclick="event.stopPropagation(); openInfoPanel('routines');" data-hover-tip="Routine consistency indicates cognitive health">ⓘ</button>
+                    </div>
+                    <div class="observation-text">
+                        92% day-to-day consistency in activity patterns demonstrates maintained executive function. Morning routine (6-9 AM) and evening wind-down (8-10 PM) are predictable and stable.
+                    </div>
+                    <div class="observation-expanded-content">
+                        <p style="margin-bottom: 8px;"><strong>Why Consistency Matters:</strong></p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">Routine establishment requires memory, planning, and time awareness. Sudden drops in consistency (<70%) may signal cognitive decline, depression, or health changes requiring evaluation.</p>
+                    </div>
+                </div>
+                
+                <div class="observation-card" onclick="toggleObservation(this)">
+                    <div class="observation-expand-btn">+</div>
+                    <div class="observation-icon">✅</div>
+                    <div class="observation-title">
+                        Zero Fall Incidents
+                        <button class="info-btn" onclick="event.stopPropagation(); openInfoPanel('falls');" data-hover-tip="Fall detection using mmWave radar technology">ⓘ</button>
+                    </div>
+                    <div class="observation-text">
+                        No falls detected during monitoring period. Combined with high mobility counts, this suggests maintained balance and environmental safety awareness.
+                    </div>
+                    <div class="observation-expanded-content">
+                        <p style="margin-bottom: 8px;"><strong>Fall Detection Technology:</strong></p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">mmWave radar measures distance to floor. Sudden height drop >12 inches + staying down >30 seconds = fall alert. No false positives from dropped objects or pets this period.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="narrative-card">
+            <h2 class="narrative-title">
+                <span>📊</span>
+                FIM Scoring Summary
+            </h2>
+            <div class="narrative-content">
+                <p><strong>Self-Care Domain:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li><strong>Bathing:</strong> 6/7 (Modified Independent) - 86% adherence, occasional prompting may benefit</li>
+                    <li><strong>Toileting:</strong> 7/7 (Complete Independent) - Appropriate frequency and duration</li>
+                </ul>
+                
+                <p><strong>Mobility Domain:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li><strong>Walk/Wheelchair:</strong> 7/7 (Complete Independent) - 342 events/day, normal transitions</li>
+                    <li><strong>Transfers:</strong> 7/7 (Complete Independent) - No difficulty indicators</li>
+                </ul>
+                
+                <p><strong>Overall Functional Status:</strong> Jane demonstrates high-level independence across monitored ADL categories. The objective sensor data supports a continued aging-in-place plan with current support levels.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Info panel content
+        const infoPanelContent = {
+            'meal-prep': {
+                title: '🍳 Meal Preparation Assessment',
+                sections: [
+                    {
+                        title: 'How We Measure',
+                        content: 'Kitchen occupancy time + multiple room transitions + stove/appliance usage patterns indicate meal preparation activity. 20-30 minute sessions suggest cooking from scratch vs. reheating.'
+                    },
+                    {
+                        title: 'Clinical Significance',
+                        content: 'Meal prep is an IADL (Instrumental Activity of Daily Living) requiring executive function, working memory, and motor skills. Increasing meal prep suggests improving cognitive engagement and physical capability.'
+                    }
+                ]
+            },
+            'hygiene': {
+                title: '🚿 Hygiene Monitoring Method',
+                sections: [
+                    {
+                        title: 'Sensor Technology',
+                        content: 'Humidity sensor detects 30%+ increase + temperature rises 8°F+ + motion in bathroom = shower event logged. No cameras, no audio - only environmental measurements.'
+                    },
+                    {
+                        title: 'Privacy First',
+                        content: 'This system respects dignity by measuring environmental changes rather than observing the person directly. We can confirm bathing occurred without any visual or audio recording.'
+                    }
+                ]
+            },
+            'sleep': {
+                title: '😴 Sleep Quality Assessment',
+                sections: [
+                    {
+                        title: 'What We Track',
+                        content: 'mmWave presence sensors detect in-bed time (duration). Motion sensors count restlessness events. Bathroom visits tracked by motion + toilet flush detection.'
+                    },
+                    {
+                        title: 'Quality Indicators',
+                        content: 'Good sleep: 7-9 hours duration, <20% restlessness score, 1-3 bathroom visits. Poor sleep: <6 hours, >30% restlessness, 4+ visits (may indicate UTI or other issues).'
+                    }
+                ]
+            },
+            'mobility': {
+                title: '🏃 Functional Mobility Tracking',
+                sections: [
+                    {
+                        title: 'What We Count',
+                        content: 'Every motion sensor detection across all rooms. High counts indicate frequent movement, room transitions, and active engagement with home environment.'
+                    },
+                    {
+                        title: 'Research Benchmarks',
+                        content: '<200 events/day correlates with increased fall risk and declining function. 250-400 events/day is typical for healthy aging. 400+ suggests very active lifestyle.'
+                    }
+                ]
+            },
+            'routines': {
+                title: '🕐 Routine Consistency Analysis',
+                sections: [
+                    {
+                        title: 'Why It Matters',
+                        content: 'Establishing and maintaining routines requires memory, executive function, and time awareness. Consistent routines indicate cognitive health and emotional stability.'
+                    },
+                    {
+                        title: 'Warning Signs',
+                        content: 'Sudden drops in consistency (<70%) may signal depression, cognitive decline, medication side effects, or health changes. Requires follow-up assessment.'
+                    }
+                ]
+            },
+            'falls': {
+                title: '✅ Fall Detection Technology',
+                sections: [
+                    {
+                        title: 'How It Works',
+                        content: 'mmWave radar continuously measures distance to floor. Sudden height drop >12 inches + staying down >30 seconds = fall alert triggered to emergency contacts.'
+                    },
+                    {
+                        title: 'False Positives',
+                        content: 'System filters out dropped objects (wrong size), pets (too small), intentional floor exercises (deliberate movement pattern). Accuracy rate >95%.'
+                    }
+                ]
+            }
+        };
+        
+        // Open info panel
+        function openInfoPanel(contentId) {
+            const content = infoPanelContent[contentId];
+            if (!content) return;
+            
+            let overlay = document.querySelector('.info-panel-overlay');
+            let panel = document.querySelector('.info-panel');
+            
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'info-panel-overlay';
+                overlay.onclick = closeInfoPanel;
+                document.body.appendChild(overlay);
+            }
+            
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.className = 'info-panel';
+                document.body.appendChild(panel);
+            }
+            
+            let sectionsHTML = '';
+            content.sections.forEach(section => {
+                sectionsHTML += `
+                    <div class="info-section">
+                        <div class="info-section-title">${section.title}</div>
+                        <div class="info-section-content">${section.content}</div>
+                    </div>
+                `;
+            });
+            
+            panel.innerHTML = `
+                <div class="info-panel-header">
+                    <div class="info-panel-title">${content.title}</div>
+                    <button class="info-panel-close" onclick="closeInfoPanel()">✕ Close</button>
+                </div>
+                <div class="info-panel-content">
+                    ${sectionsHTML}
+                </div>
+            `;
+            
+            panel.classList.add('open');
+            overlay.classList.add('open');
+            
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('panel-open');
+            }
+        }
+        
+        // Close info panel
+        function closeInfoPanel() {
+            const panel = document.querySelector('.info-panel');
+            const overlay = document.querySelector('.info-panel-overlay');
+            if (panel) panel.classList.remove('open');
+            if (overlay) overlay.classList.remove('open');
+            document.body.classList.remove('panel-open');
+        }
+        
+        // Toggle observation card expansion
+        function toggleObservation(card) {
+            const isExpanded = card.classList.contains('expanded');
+            
+            // Close all cards
+            document.querySelectorAll('.observation-card').forEach(c => {
+                c.classList.remove('expanded');
+                const btn = c.querySelector('.observation-expand-btn');
+                if (btn) btn.textContent = '+';
+            });
+            
+            // Open this card if it wasn't expanded
+            if (!isExpanded) {
+                card.classList.add('expanded');
+                const btn = card.querySelector('.observation-expand-btn');
+                if (btn) btn.textContent = '−';
+            }
+        }
+        
+        // Hover tooltip system
+        const hoverTooltip = document.createElement('div');
+        hoverTooltip.className = 'hover-tooltip';
+        document.body.appendChild(hoverTooltip);
+        
+        document.querySelectorAll('[data-hover-tip]').forEach(el => {
+            let timeout;
+            el.addEventListener('mouseenter', (e) => {
+                timeout = setTimeout(() => {
+                    const rect = el.getBoundingClientRect();
+                    hoverTooltip.textContent = el.dataset.hoverTip;
+                    hoverTooltip.style.left = rect.left + 'px';
+                    hoverTooltip.style.top = (rect.bottom + 10) + 'px';
+                    hoverTooltip.classList.add('visible');
+                }, 300);
+            });
+            el.addEventListener('mouseleave', () => {
+                clearTimeout(timeout);
+                hoverTooltip.classList.remove('visible');
+            });
+        });
+        
+        // Dashboard menu toggle
+        function toggleDashboardMenu() {
+            const menu = document.getElementById('dashboardMenu');
+            menu.classList.toggle('open');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('dashboardMenu');
+            const button = document.querySelector('.nav-select');
+            if (menu && !menu.contains(e.target) && !button.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>
