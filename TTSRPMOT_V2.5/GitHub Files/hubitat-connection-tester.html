@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubitat Connection Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 32px;
+            font-size: 1.1rem;
+        }
+        
+        .step {
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+        
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+        
+        .step-content {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+        
+        .code-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 12px 0;
+            overflow-x: auto;
+        }
+        
+        .test-section {
+            background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+            padding: 32px;
+            border-radius: 12px;
+            margin-top: 32px;
+            text-align: center;
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-test:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-test:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result-box {
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-box.success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+            display: block;
+        }
+        
+        .result-box.error {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            display: block;
+        }
+        
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .result-message {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .device-list {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .device-item {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        .spinner.active {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .config-status {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        .config-status.configured {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .config-status.not-configured {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box strong {
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 Hubitat Connection Tester</h1>
+        <p class="subtitle">Test your Maker API configuration before using the dashboards</p>
+        
+        <!-- Configuration Status -->
+        <div id="configStatus" class="config-status"></div>
+        
+        <!-- Instructions -->
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Open Hubitat Web Interface
+            </div>
+            <div class="step-content">
+                Navigate to your Hubitat hub at:
+                <div class="code-box">http://YOUR-HUB-IP-ADDRESS</div>
+                Example: <code>http://192.168.1.100</code> or <code>http://hubitat.local</code>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Find Maker API
+            </div>
+            <div class="step-content">
+                <ol style="margin-left: 20px; margin-top: 12px;">
+                    <li>Click <strong>"Apps"</strong> in the left sidebar</li>
+                    <li>Click on <strong>"Maker API"</strong> in your installed apps</li>
+                    <li>If you don't see it, click <strong>"Add Built-In App"</strong> → Select <strong>"Maker API"</strong></li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Copy Your Cloud Endpoint URL
+            </div>
+            <div class="step-content">
+                Inside the Maker API app, scroll down to find:<br>
+                <strong>"Get All Devices with Full Details"</strong>
+                <br><br>
+                You'll see a URL like:
+                <div class="code-box">https://cloud.hubitat.com/api/abc-123/apps/12/devices?access_token=xyz789</div>
+                
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> Copy the ENTIRE URL including the access_token parameter!
+                </div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Paste URL in Configuration File
+            </div>
+            <div class="step-content">
+                Open <strong>hubitat-config.js</strong> and paste your URL here:
+                <div class="code-box">MAKER_API_FULL_URL: 'PASTE_YOUR_URL_HERE'</div>
+                Then reload this page.
+            </div>
+        </div>
+        
+        <!-- Test Section -->
+        <div class="test-section">
+            <h2 style="margin-bottom: 20px;">Ready to Test?</h2>
+            <button id="testBtn" class="btn-test" onclick="runTest()">
+                🚀 Test Connection
+            </button>
+            
+            <div class="spinner" id="spinner"></div>
+            
+            <div id="resultBox" class="result-box">
+                <div class="result-icon" id="resultIcon"></div>
+                <div class="result-title" id="resultTitle"></div>
+                <div class="result-message" id="resultMessage"></div>
+                <div id="deviceList" class="device-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load configuration and API -->
+    <script src="hubitat-config.js"></script>
+    <script src="hubitat-api.js"></script>
+    
+    <script>
+        // Check configuration status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const statusDiv = document.getElementById('configStatus');
+            
+            if (!ParsedConfig) {
+                statusDiv.className = 'config-status not-configured';
+                statusDiv.innerHTML = '⚠️ Configuration Error: hubitat-config.js not loaded';
+                document.getElementById('testBtn').disabled = true;
+                return;
+            }
+            
+            if (!ParsedConfig.isValid) {
+                statusDiv.className = 'config-status not-configured';
+                statusDiv.innerHTML = `⚠️ Not Configured: ${ParsedConfig.error}`;
+                document.getElementById('testBtn').disabled = true;
+            } else {
+                statusDiv.className = 'config-status configured';
+                statusDiv.innerHTML = `✅ Configuration Loaded - Ready to test!<br><small>App ID: ${ParsedConfig.appId}</small>`;
+                document.getElementById('testBtn').disabled = false;
+            }
+        });
+        
+        async function runTest() {
+            const resultBox = document.getElementById('resultBox');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const deviceList = document.getElementById('deviceList');
+            const spinner = document.getElementById('spinner');
+            const testBtn = document.getElementById('testBtn');
+            
+            // Reset UI
+            resultBox.className = 'result-box';
+            deviceList.innerHTML = '';
+            spinner.classList.add('active');
+            testBtn.disabled = true;
+            
+            try {
+                // Create API instance
+                const api = createHubitatAPI();
+                
+                if (!api) {
+                    throw new Error('Failed to create API instance - check configuration');
+                }
+                
+                // Test connection
+                console.log('🧪 Running connection test...');
+                const result = await api.testConnection();
+                
+                spinner.classList.remove('active');
+                
+                if (result.success) {
+                    // SUCCESS!
+                    resultBox.className = 'result-box success';
+                    resultIcon.textContent = '✅';
+                    resultTitle.textContent = 'Connection Successful!';
+                    resultMessage.innerHTML = result.message;
+                    
+                    // Show device list
+                    if (result.data && result.data.devices) {
+                        deviceList.innerHTML = '<strong>Connected Devices:</strong><br>';
+                        result.data.devices.slice(0, 10).forEach(device => {
+                            const div = document.createElement('div');
+                            div.className = 'device-item';
+                            div.textContent = `${device.label || device.name} (${device.type || 'Unknown'})`;
+                            deviceList.appendChild(div);
+                        });
+                        
+                        if (result.data.devices.length > 10) {
+                            const more = document.createElement('div');
+                            more.className = 'device-item';
+                            more.textContent = `... and ${result.data.devices.length - 10} more devices`;
+                            deviceList.appendChild(more);
+                        }
+                    }
+                    
+                    console.log('✅ Test passed!', result);
+                    
+                } else {
+                    // FAILURE
+                    resultBox.className = 'result-box error';
+                    resultIcon.textContent = '❌';
+                    resultTitle.textContent = 'Connection Failed';
+                    resultMessage.innerHTML = `
+                        <strong>Error:</strong> ${result.message}
+                        <br><br>
+                        <strong>Common solutions:</strong>
+                        <ul style="text-align: left; margin-top: 12px;">
+                            <li>Verify your Maker API URL is correct in hubitat-config.js</li>
+                            <li>Make sure you copied the ENTIRE URL including access_token</li>
+                            <li>Check that your hub is online and accessible</li>
+                            <li>Verify Maker API app is enabled in Hubitat</li>
+                        </ul>
+                    `;
+                    
+                    console.error('❌ Test failed:', result);
+                }
+                
+            } catch (error) {
+                spinner.classList.remove('active');
+                resultBox.className = 'result-box error';
+                resultIcon.textContent = '❌';
+                resultTitle.textContent = 'Test Error';
+                resultMessage.innerHTML = `
+                    <strong>Error:</strong> ${error.message}
+                    <br><br>
+                    Check the browser console (F12) for more details.
+                `;
+                console.error('❌ Test exception:', error);
+            }
+            
+            testBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
